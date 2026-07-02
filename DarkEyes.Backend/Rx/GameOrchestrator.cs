@@ -1,14 +1,14 @@
 ﻿using DarkEyes.Backend.Abstractions;
-using DarkEyes.Backend.Rx;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace DarkEyes.Backend
+namespace DarkEyes.Backend.Rx
 {
-    public sealed class GameOrchestrator(CommandRouter router, ILogger logger) : IGameOrchestrator
+    public sealed class GameOrchestrator(CommandRouter router, GameStore store, ILogger logger) : IGameOrchestrator
     {
         private readonly CommandRouter _router = router;
+        private readonly GameStore _store = store;
         private readonly ILogger _logger = logger;
 
         private readonly Subject<IGameEvent> _subject = new();
@@ -23,7 +23,7 @@ namespace DarkEyes.Backend
             _dispatching = true;
             try
             {
-                HandlerContext context = new(emit: e => _subject.OnNext(e), _logger);
+                HandlerContext context = new(emit: _subject.OnNext, _store, _logger);
                 _router.Handle(command, context);
             }
             finally

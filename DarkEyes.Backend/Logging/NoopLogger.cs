@@ -1,8 +1,8 @@
 ﻿using DarkEyes.Backend.Abstractions;
 
-namespace DarkEyes.Backend.Tests
+namespace DarkEyes.Backend.Logging
 {
-    internal class NoopLogger : ILogger
+    public class NoopLogger : ILogger
     {
         public void Log(LogLevel lvel, string message) { }
     }

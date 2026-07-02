@@ -1,11 +1,12 @@
 ﻿using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 using System;
 using System.Collections.Generic;
 
-namespace DarkEyes.Backend.Tests
+namespace DarkEyes.Backend.Tests.Rx
 {
-    public class GameOrchestratorTests
+    public sealed class GameOrchestratorTests
     {
         [Fact]
         public void Should_EmitEvent_When_DispatchCommand()
@@ -13,10 +14,10 @@ namespace DarkEyes.Backend.Tests
             // Arrange
             CommandRouter router = new();
             router.Register<TestCommand>((cmd, ctx) => ctx.Emit(new TestEvent()));
-            GameOrchestrator orchestrator = new(router, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(e => emittedEvents.Add(e));
+            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new TestCommand());
@@ -31,10 +32,10 @@ namespace DarkEyes.Backend.Tests
         {
             // Arrange
             CommandRouter router = new();
-            GameOrchestrator orchestrator = new(router, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(e => emittedEvents.Add(e));
+            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new TestCommand());
@@ -50,10 +51,10 @@ namespace DarkEyes.Backend.Tests
             // Arrange
             CommandRouter router = new();
             router.Register<TestCommand>((cmd, ctx) => cmd.Dispatcher.Dispatch(cmd));
-            GameOrchestrator orchestrator = new(router, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(e => emittedEvents.Add(e));
+            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             Assert.Throws<InvalidOperationException>(() => orchestrator.Dispatch(new TestCommand(orchestrator)));
