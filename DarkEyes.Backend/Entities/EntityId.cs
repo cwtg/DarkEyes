@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DarkEyes.Backend.Core
+namespace DarkEyes.Backend.Entities
 {
     public readonly struct EntityId(string value)
     {

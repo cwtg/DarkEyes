@@ -1,20 +1,15 @@
-﻿using DarkEyes.Backend.Core;
+﻿using DarkEyes.Backend.Entities;
 using DarkEyes.Backend.Space;
-using System;
-using System.Collections.Generic;
 
 namespace DarkEyes.Backend.State
 {
     public class WorldState
     {
-        public Dictionary<EntityId, GamePosition> EntityPositions = [];
+        public readonly EntityStore Entities = new();
 
         public void ChangePosition(EntityId entityId, GamePosition position)
         {
-            if (EntityPositions.ContainsKey(entityId))
-                EntityPositions[entityId] = position;
-            else
-                throw new InvalidOperationException($"Entity {entityId} not found");
+            Entities.MutateEntity(entityId, (entity) => entity.Position = position);
         }
     }
 }

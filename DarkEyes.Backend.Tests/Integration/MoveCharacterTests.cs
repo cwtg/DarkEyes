@@ -1,5 +1,5 @@
 ﻿using DarkEyes.Backend.Abstractions;
-using DarkEyes.Backend.Core;
+using DarkEyes.Backend.Entities;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 using DarkEyes.Backend.Space;
@@ -8,7 +8,7 @@ using DarkEyes.Backend.Space.Events;
 using System;
 using System.Collections.Generic;
 
-namespace DarkEyes.Backend.Tests.Space
+namespace DarkEyes.Backend.Tests.Integration
 {
     public sealed class MoveCharacterTests
     {
@@ -23,10 +23,9 @@ namespace DarkEyes.Backend.Tests.Space
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.EntityPositions = new()
-            {
-                { id, startPosition }
-            };
+            store.World.Entities.Add(new Entity(id, startPosition, null));
+            store.World.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), null));
+            store.World.Entities.Add(new Entity(new("other"), new(-1, 0, 1), null));
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
@@ -39,9 +38,9 @@ namespace DarkEyes.Backend.Tests.Space
             Assert.Single(emittedEvents);
             Assert.IsType<CharacterSteppedEvent>(emittedEvents[0]);
             var emitted = (CharacterSteppedEvent) emittedEvents[0];
-            Assert.Equal(emitted.Id, id);
-            Assert.Equal(emitted.From, startPosition);
-            Assert.Equal(emitted.To, endPosition);
+            Assert.Equal(id, emitted.Id);
+            Assert.Equal(startPosition, emitted.From);
+            Assert.Equal(endPosition, emitted.To);
         }
 
         [Fact]

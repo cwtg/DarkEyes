@@ -1,5 +1,6 @@
 ﻿using DarkEyes.Backend.Rx;
 using DarkEyes.Backend.Space.Events;
+using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Space.Commands
 {
@@ -7,15 +8,16 @@ namespace DarkEyes.Backend.Space.Commands
     {
         public void Handle(MoveCharacterCommand command, HandlerContext context)
         {
-
-            var entityExists = context.Store.World.EntityPositions.TryGetValue(command.Id, out var from);
-            if (entityExists)
+            try
             {
+                var entity = context.Store.World.Entities.Get(command.Id);
                 context.Store.World.ChangePosition(command.Id, command.Target);
-                context.Emit(new CharacterSteppedEvent(command.Id, from, command.Target));
+                context.Emit(new CharacterSteppedEvent(command.Id, entity.Position, command.Target));
             }
-            else
+            catch (KeyNotFoundException ex)
+            {
                 context.Emit(new ErrorRaisedEvent($"Entity {command.Id} not registered"));
+            }
         }
     }
 }

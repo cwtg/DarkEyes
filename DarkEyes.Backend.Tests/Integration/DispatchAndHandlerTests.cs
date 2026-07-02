@@ -4,9 +4,9 @@ using DarkEyes.Backend.Rx;
 using System;
 using System.Collections.Generic;
 
-namespace DarkEyes.Backend.Tests.Rx
+namespace DarkEyes.Backend.Tests.Integration
 {
-    public sealed class GameOrchestratorTests
+    public sealed class DispatchAndHandlerTests
     {
         [Fact]
         public void Should_EmitEvent_When_DispatchCommand()

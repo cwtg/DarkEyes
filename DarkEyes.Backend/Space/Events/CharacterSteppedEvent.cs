@@ -1,5 +1,5 @@
 ﻿using DarkEyes.Backend.Abstractions;
-using DarkEyes.Backend.Core;
+using DarkEyes.Backend.Entities;
 
 namespace DarkEyes.Backend.Space.Events
 {
