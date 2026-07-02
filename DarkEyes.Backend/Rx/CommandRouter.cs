@@ -6,9 +6,9 @@ namespace DarkEyes.Backend.Rx
 {
     public sealed class CommandRouter
     {
-        private readonly Dictionary<Type, Action<ICommand, HandlerContext>> _handlers = [];
+        private readonly Dictionary<Type, CommandHandler<ICommand>> _handlers = [];
 
-        public void Register<T>(Action<T, HandlerContext> handler) where T : ICommand
+        public void Register<T>(CommandHandler<T> handler) where T : ICommand
         {
             _handlers[typeof(T)] = (command, context) => handler((T)command, context);
         }
