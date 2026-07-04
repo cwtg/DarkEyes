@@ -18,21 +18,34 @@ namespace DarkEyes.Backend.Tests.Integration
             // Arrange
             EntityId id = new("mover");
             GamePosition startPosition = new(0, 0, 0);
-            GamePosition endPosition = new(1, 1, 1);
+            GamePosition endPosition = new(1, 0, 0);
 
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, null));
-            store.World.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), null));
-            store.World.Entities.Add(new Entity(new("other"), new(-1, 0, 1), null));
+            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.World.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), new(), null));
+            store.World.Entities.Add(new Entity(new("other"), new(-1, 0, 1), new(), null));
+            var walkability = new bool[,]
+            {
+                { true, true },
+                { true, true }
+            };
+            var cost = new int[,]
+            {
+                { 1, 1 },
+                { 1, 1 }
+            };
+            NavigationMap map = new();
+            map.Set(walkability, cost);
+            store.World.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
-            orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition));
+            orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
 
             // Assert
             Assert.Single(emittedEvents);
@@ -59,7 +72,7 @@ namespace DarkEyes.Backend.Tests.Integration
             using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
-            orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition));
+            orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
 
             // Assert
             Assert.Single(emittedEvents);

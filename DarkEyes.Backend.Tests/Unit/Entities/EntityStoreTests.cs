@@ -14,7 +14,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
             EntityStore store = new();
             GamePosition beforePos = new(1, 2, 3);
             GamePosition afterPos = new(0, 0, 0);
-            store.Add(new(id, beforePos, null));
+            store.Add(new(id, beforePos, new(), null));
 
             // Act
             var retrievedBefore = store.Get(id);
