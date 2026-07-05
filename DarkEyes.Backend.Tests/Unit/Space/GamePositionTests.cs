@@ -1,4 +1,5 @@
-﻿using DarkEyes.Backend.Space;
+using System.Collections.Generic;
+using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.Tests.Unit.Space
 {
@@ -12,7 +13,7 @@ namespace DarkEyes.Backend.Tests.Unit.Space
             GamePosition target = new(2, 1, 0);
 
             // Act
-            var distance = origin.DistanceTo(target);
+            int distance = origin.DistanceTo(target);
 
             // Assert
             Assert.Equal(2, distance);
@@ -25,7 +26,7 @@ namespace DarkEyes.Backend.Tests.Unit.Space
             GamePosition origin = new(0, 0, 0);
 
             // Act
-            var neighbors = origin.Neighbors();
+            IReadOnlyList<GamePosition> neighbors = origin.Neighbors();
 
             // Arrange
             Assert.Equal(6, neighbors.Count);

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Space.Pathfinding
 {
@@ -7,7 +7,9 @@ namespace DarkEyes.Backend.Space.Pathfinding
         public int Compare(PathNode a, PathNode b)
         {
             if (ReferenceEquals(a, b)) return 0;
+
             if (a is null) return -1;
+
             if (b is null) return 1;
 
             int compare = a.TotalCost.CompareTo(b.TotalCost);

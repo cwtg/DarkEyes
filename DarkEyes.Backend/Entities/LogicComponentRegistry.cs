@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Entities
 {
     public class LogicComponentRegistry
     {
-        private readonly Dictionary<string, ILogicComponent> _registry = [];
+        private readonly Dictionary<string, ILogicComponent> _registry =[];
 
         public void Register(string id, ILogicComponent logicComponent)
         {
@@ -19,7 +19,7 @@ namespace DarkEyes.Backend.Entities
         {
             return _registry[id];
         }
-        
+
         public bool TryResolve(string id, out ILogicComponent logicComponent)
         {
             return _registry.TryGetValue(id, out logicComponent);

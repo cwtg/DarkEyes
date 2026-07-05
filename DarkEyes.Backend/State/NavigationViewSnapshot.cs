@@ -1,5 +1,5 @@
-﻿using DarkEyes.Backend.Space;
 using System.Collections.Generic;
+using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.State
 {
@@ -13,19 +13,10 @@ namespace DarkEyes.Backend.State
             return new();
         }
 
-        public bool IsOccupied(GamePosition position)
-        {
-            return _occupied.Contains(position);
-        }
+        public bool IsOccupied(GamePosition position) => _occupied.Contains(position);
 
-        public bool IsWalkable(GamePosition position)
-        {
-            return _navigationMap.IsWalkable(position);
-        }
+        public bool IsWalkable(GamePosition position) => _navigationMap.IsWalkable(position);
 
-        public int MovementCost(GamePosition position)
-        {
-            return _navigationMap.BaseMovementCost(position);
-        }
+        public int MovementCost(GamePosition position) => _navigationMap.BaseMovementCost(position);
     }
 }

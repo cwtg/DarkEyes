@@ -1,6 +1,6 @@
-﻿using DarkEyes.Backend.Entities;
-using DarkEyes.Backend.Space;
 using System.Collections.Generic;
+using DarkEyes.Backend.Entities;
+using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.Tests.Unit.Entities
 {
@@ -17,9 +17,9 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
             store.Add(new(id, beforePos, new(), null));
 
             // Act
-            var retrievedBefore = store.Get(id);
+            Entity retrievedBefore = store.Get(id);
             store.MutateEntity(id, (e) => e.Position = afterPos);
-            var retrievedAfter = store.Get(id);
+            Entity retrievedAfter = store.Get(id);
 
             // Assert
             Assert.Equal(beforePos, retrievedBefore.Position);

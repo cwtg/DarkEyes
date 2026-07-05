@@ -1,4 +1,4 @@
-﻿namespace DarkEyes.Backend.State
+namespace DarkEyes.Backend.State
 {
     public class GameTime
     {

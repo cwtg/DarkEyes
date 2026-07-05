@@ -1,5 +1,5 @@
-﻿using DarkEyes.Backend.Abstractions;
 using System;
+using DarkEyes.Backend.Abstractions;
 
 namespace DarkEyes.Backend.Rx
 {

@@ -1,4 +1,4 @@
-﻿namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space
 {
     public class MovementProfile
     {

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Space.Pathfinding
 {
-    public class Pathfinder
+    public static class Pathfinder
     {
         public static IReadOnlyList<GamePosition> FindPath(GamePosition from, GamePosition to, INavigationView navigationView, MovementProfile profile)
         {
@@ -10,7 +10,7 @@ namespace DarkEyes.Backend.Space.Pathfinding
             {
                 FromCost = 0,
                 ToCost = from.DistanceTo(to),
-                State = NodeState.Open
+                State = NodeState.Open,
             };
             PathNode target = new(to);
 
@@ -58,12 +58,12 @@ namespace DarkEyes.Backend.Space.Pathfinding
                 }
             }
 
-            return [];
+            return[];
         }
 
-        private static IReadOnlyList<GamePosition> RetracePath(PathNode start, PathNode end)
+        private static List<GamePosition> RetracePath(PathNode start, PathNode end)
         {
-            List<GamePosition> path = [];
+            List<GamePosition> path =[];
             PathNode current = end;
 
             while (current != start)

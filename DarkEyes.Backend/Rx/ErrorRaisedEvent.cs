@@ -1,4 +1,4 @@
-﻿using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Abstractions;
 
 namespace DarkEyes.Backend.Rx
 {

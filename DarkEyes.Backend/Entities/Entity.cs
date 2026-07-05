@@ -1,5 +1,5 @@
-﻿using DarkEyes.Backend.Space;
 using System.Collections.Generic;
+using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.Entities
 {
@@ -10,6 +10,8 @@ namespace DarkEyes.Backend.Entities
         public MovementProfile MovementProfile = profile;
         public IReadOnlyList<ComponentData>? ComponentData = componentData;
 
-        public Entity(Entity original) : this(original.Id, original.Position, original.MovementProfile, original.ComponentData) { }
+        public Entity(Entity original) : this(original.Id, original.Position, original.MovementProfile, original.ComponentData)
+        {
+        }
     }
 }

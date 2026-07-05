@@ -1,8 +1,8 @@
-﻿using DarkEyes.Backend.Abstractions;
-using DarkEyes.Backend.Logging;
-using DarkEyes.Backend.Rx;
 using System;
 using System.Collections.Generic;
+using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Logging;
+using DarkEyes.Backend.Rx;
 
 namespace DarkEyes.Backend.Tests.Integration
 {
@@ -17,7 +17,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new TestCommand());
@@ -35,7 +35,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new TestCommand());
@@ -54,7 +54,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             Assert.Throws<InvalidOperationException>(() => orchestrator.Dispatch(new TestCommand(orchestrator)));
@@ -63,10 +63,11 @@ namespace DarkEyes.Backend.Tests.Integration
             Assert.Empty(emittedEvents);
         }
     }
-}
 
-file sealed class TestCommand(IGameOrchestrator? dispatcher = null) : ICommand {
-    public IGameOrchestrator Dispatcher = dispatcher;
-}
+    sealed file class TestCommand(IGameOrchestrator? dispatcher = null) : ICommand
+    {
+        public IGameOrchestrator Dispatcher = dispatcher;
+    }
 
-file sealed class TestEvent : IGameEvent { }
+    sealed file class TestEvent : IGameEvent { }
+}

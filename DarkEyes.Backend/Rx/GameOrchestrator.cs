@@ -1,7 +1,7 @@
-﻿using DarkEyes.Backend.Abstractions;
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using DarkEyes.Backend.Abstractions;
 
 namespace DarkEyes.Backend.Rx
 {
@@ -27,7 +27,7 @@ namespace DarkEyes.Backend.Rx
                 _router.Handle(command, context);
             }
             finally
-            { 
+            {
                 _dispatching = false;
             }
         }

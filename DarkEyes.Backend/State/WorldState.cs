@@ -1,6 +1,6 @@
-﻿using DarkEyes.Backend.Entities;
-using DarkEyes.Backend.Space;
 using System.Collections.Generic;
+using DarkEyes.Backend.Entities;
+using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.State
 {
@@ -8,7 +8,7 @@ namespace DarkEyes.Backend.State
     {
         public readonly EntityStore Entities = new();
 
-        public NavigationMap NavigationMap = new();
+        public NavigationMap NavigationMap { get; set; } = new();
 
         public void ChangePosition(EntityId entityId, GamePosition position)
         {
@@ -17,11 +17,12 @@ namespace DarkEyes.Backend.State
 
         public INavigationView NavigationSnapshot()
         {
-            HashSet<GamePosition> occupied = [];
-            foreach (var entity in Entities.GetAll())
+            HashSet<GamePosition> occupied =[];
+            foreach (Entity entity in Entities.GetAll())
             {
                 occupied.Add(entity.Position);
             }
+
             return new NavigationViewSnapshot(NavigationMap, occupied);
         }
     }

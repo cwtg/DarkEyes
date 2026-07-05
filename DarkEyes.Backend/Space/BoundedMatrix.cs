@@ -1,16 +1,20 @@
-﻿namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space
 {
     internal class BoundedMatrix<T>
     {
         private readonly T[] _storage;
-        private readonly int _minRow, _maxRow;
-        private readonly int _minCol, _maxCol;
+        private readonly int _minRow;
+        private readonly int _maxRow;
+        private readonly int _minCol;
+        private readonly int _maxCol;
         private readonly int _totalCols;
 
         public BoundedMatrix(int minRow, int maxRow, int minCol, int maxCol)
         {
-            _minRow = minRow; _maxRow = maxRow;
-            _minCol = minCol; _maxCol = maxCol;
+            _minRow = minRow;
+            _maxRow = maxRow;
+            _minCol = minCol;
+            _maxCol = maxCol;
 
             int totalRows = (maxRow - minRow) + 1;
             _totalCols = (maxCol - minCol) + 1;

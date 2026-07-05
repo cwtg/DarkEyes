@@ -1,6 +1,6 @@
-﻿using DarkEyes.Backend.Abstractions;
-using DarkEyes.Backend.Entities;
 using System.Collections.Generic;
+using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Entities;
 
 namespace DarkEyes.Backend.Space.Commands
 {

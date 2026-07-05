@@ -1,12 +1,12 @@
-﻿using DarkEyes.Backend.Abstractions;
+using System;
+using System.Collections.Generic;
+using DarkEyes.Backend.Abstractions;
 using DarkEyes.Backend.Entities;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 using DarkEyes.Backend.Space;
 using DarkEyes.Backend.Space.Commands;
 using DarkEyes.Backend.Space.Events;
-using System;
-using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Tests.Integration
 {
@@ -26,12 +26,12 @@ namespace DarkEyes.Backend.Tests.Integration
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
             store.World.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), new(), null));
             store.World.Entities.Add(new Entity(new("other"), new(-1, 0, 1), new(), null));
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true },
                 { true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1 },
                 { 1, 1 }
@@ -42,7 +42,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
@@ -50,7 +50,7 @@ namespace DarkEyes.Backend.Tests.Integration
             // Assert
             Assert.Single(emittedEvents);
             Assert.IsType<CharacterSteppedEvent>(emittedEvents[0]);
-            var emitted = (CharacterSteppedEvent) emittedEvents[0];
+            var emitted = (CharacterSteppedEvent)emittedEvents[0];
             Assert.Equal(id, emitted.Id);
             Assert.Equal(startPosition, emitted.From);
             Assert.Equal(endPosition, emitted.To);
@@ -69,7 +69,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));

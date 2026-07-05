@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace DarkEyes.Backend.Entities
 {
     public class EntityStore
     {
-        private readonly Dictionary<EntityId, Entity> _entities = [];
+        private readonly Dictionary<EntityId, Entity> _entities =[];
 
         public Entity Get(EntityId id)
         {
@@ -14,7 +14,7 @@ namespace DarkEyes.Backend.Entities
 
         private Entity GetRef(EntityId id)
         {
-            if (_entities.TryGetValue(id, out var entity))
+            if (_entities.TryGetValue(id, out Entity? entity))
                 return entity;
             else
                 throw new KeyNotFoundException($"There is no entity {id}");
@@ -27,7 +27,7 @@ namespace DarkEyes.Backend.Entities
 
         public void MutateEntity(EntityId id, Action<Entity> mutation)
         {
-            var entity = GetRef(id);
+            Entity entity = GetRef(id);
             mutation(entity);
         }
 

@@ -1,4 +1,6 @@
-﻿namespace System.Runtime.CompilerServices
+namespace System.Runtime.CompilerServices
 {
-    internal static class IsExternalInit { }
+    internal static class IsExternalInit
+    {
+    }
 }

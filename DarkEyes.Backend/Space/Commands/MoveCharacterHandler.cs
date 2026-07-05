@@ -1,9 +1,10 @@
-﻿using DarkEyes.Backend.Rx;
-using DarkEyes.Backend.Space.Events;
-using DarkEyes.Backend.Space.Pathfinding;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DarkEyes.Backend.Entities;
+using DarkEyes.Backend.Rx;
+using DarkEyes.Backend.Space.Events;
+using DarkEyes.Backend.Space.Pathfinding;
 
 namespace DarkEyes.Backend.Space.Commands
 {
@@ -13,22 +14,34 @@ namespace DarkEyes.Backend.Space.Commands
         {
             try
             {
-                var entity = context.Store.World.Entities.Get(command.Id);
+                Entity entity = context.Store.World.Entities.Get(command.Id);
 
-                if (entity.Position == command.Target) return;
-                var path = command.PreferredPath;
-                var navigationView = context.Store.World.NavigationSnapshot();
-                if (!ValidateHint(entity.Position, path, command.Target, navigationView, entity.MovementProfile))
-                    path = Pathfinder.FindPath(entity.Position, command.Target, navigationView, entity.MovementProfile);
-                if (path.Count == 0)
-                    context.Emit(new ErrorRaisedEvent($"No valid path to target {command.Target} for {command.Id}"));
-
-                var from = entity.Position;
-                foreach(var cell in path)
+                if (entity.Position == command.Target)
                 {
-                    var cellContext = navigationView.ContextAt(cell);
+                    return;
+                }
+
+                IReadOnlyList<GamePosition>? path = command.PreferredPath;
+                INavigationView navigationView = context.Store.World.NavigationSnapshot();
+                if (!ValidateHint(entity.Position, path, command.Target, navigationView, entity.MovementProfile))
+                {
+                    path = Pathfinder.FindPath(entity.Position, command.Target, navigationView, entity.MovementProfile);
+                }
+
+                if (path.Count == 0)
+                {
+                    context.Emit(new ErrorRaisedEvent($"No valid path to target {command.Target} for {command.Id}"));
+                }
+
+                GamePosition from = entity.Position;
+                foreach (GamePosition cell in path)
+                {
+                    CellContext cellContext = navigationView.ContextAt(cell);
                     bool interrupted = false; // evaluate cellContext
-                    if (interrupted) return;
+                    if (interrupted)
+                    {
+                        return;
+                    }
 
                     context.Store.World.ChangePosition(command.Id, cell);
 
@@ -42,13 +55,13 @@ namespace DarkEyes.Backend.Space.Commands
             }
         }
 
-        private bool ValidateHint(GamePosition from, IReadOnlyList<GamePosition> path, GamePosition target, INavigationView navigationView, MovementProfile profile)
+        private static bool ValidateHint(GamePosition from, IReadOnlyList<GamePosition> path, GamePosition target, INavigationView navigationView, MovementProfile profile)
         {
             if (path is null || path.Count == 0) return false;
 
-            var previous = from;
-            var movementCost = 0;
-            foreach (var current in path)
+            GamePosition previous = from;
+            int movementCost = 0;
+            foreach (GamePosition current in path)
             {
                 if (!previous.Neighbors().Contains(current)) return false;
                 if (!IsPositionValid(current, navigationView)) return false;
@@ -63,7 +76,7 @@ namespace DarkEyes.Backend.Space.Commands
             return true;
         }
 
-        private bool IsPositionValid(GamePosition position, INavigationView navigationView)
+        private static bool IsPositionValid(GamePosition position, INavigationView navigationView)
         {
             return navigationView.IsWalkable(position) && !navigationView.IsOccupied(position);
         }

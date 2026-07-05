@@ -1,4 +1,4 @@
-﻿using DarkEyes.Backend.Entities;
+using DarkEyes.Backend.Entities;
 
 namespace DarkEyes.Backend.Tests.Unit.Entities
 {
@@ -13,7 +13,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
 
             // Act
             registry.Register(id, new TestLogicComponent(id));
-            var retrieved = registry.Resolve(id);
+            ILogicComponent retrieved = registry.Resolve(id);
 
             // Assert
             Assert.Equal(new TestLogicComponent(id).ComponentId, retrieved.ComponentId);
@@ -27,7 +27,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
             LogicComponentRegistry registry = new();
 
             // Act
-            registry.TryResolve(id, out var retrieved);
+            registry.TryResolve(id, out ILogicComponent? retrieved);
 
             // Assert
             Assert.Null(retrieved);
@@ -35,7 +35,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
     }
 }
 
-file sealed class TestLogicComponent(string id) : ILogicComponent
+sealed file class TestLogicComponent(string id) : ILogicComponent
 {
     public string ComponentId { get; } = id;
 }

@@ -1,12 +1,12 @@
-﻿using DarkEyes.Backend.Abstractions;
+using System;
+using System.Collections.Generic;
+using DarkEyes.Backend.Abstractions;
 using DarkEyes.Backend.Entities;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 using DarkEyes.Backend.Space;
 using DarkEyes.Backend.Space.Commands;
 using DarkEyes.Backend.Space.Events;
-using System;
-using System.Collections.Generic;
 using Xunit.Abstractions;
 
 namespace DarkEyes.Backend.Tests.Integration
@@ -26,7 +26,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameStore store = new();
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true, true, true, true },
                 { true, true, true, true, true },
@@ -34,7 +34,7 @@ namespace DarkEyes.Backend.Tests.Integration
                 { true, true, true, true, true },
                 { true, true, true, true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1, 1, 1, 1 },
                 { 1, 1, 1, 1, 1 },
@@ -48,15 +48,16 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
 
             // Assert
             Assert.Equal(4, emittedEvents.Count);
-            var from = startPosition;
-            foreach(var ev in emittedEvents) {
+            GamePosition from = startPosition;
+            foreach (IGameEvent ev in emittedEvents)
+            {
                 Assert.IsType<CharacterSteppedEvent>(ev);
                 var emitted = (CharacterSteppedEvent)ev;
                 Assert.Equal(id, emitted.Id);
@@ -79,7 +80,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameStore store = new();
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true, false, true, true },
                 { true, true, false, true, true },
@@ -87,7 +88,7 @@ namespace DarkEyes.Backend.Tests.Integration
                 { true, true, true, true, true },
                 { true, true, true, true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1, 1, 1, 1 },
                 { 1, 1, 1, 1, 1 },
@@ -101,7 +102,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
@@ -125,7 +126,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameStore store = new();
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true, true, true, true },
                 { true, true, true, true, true },
@@ -133,7 +134,7 @@ namespace DarkEyes.Backend.Tests.Integration
                 { true, true, true, true, true },
                 { true, true, true, true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1, 1, 1, 1 },
                 { 1, 1, 1, 1, 1 },
@@ -147,7 +148,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
@@ -170,7 +171,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameStore store = new();
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true, true, true, true },
                 { true, true, true, true, true },
@@ -178,7 +179,7 @@ namespace DarkEyes.Backend.Tests.Integration
                 { true, true, true, true, true },
                 { true, true, true, true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1, 1, 1, 1 },
                 { 1, 1, 1, 1, 1 },
@@ -192,23 +193,25 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<GamePosition> preferredPath =
+
             [
                 new(0, 1, 0),
-                new(1, 1, 0),
-                new(2, 1, 0),
-                new(3, 0, 0),
-                new(4, 0, 0),
-            ];
+            new(1, 1, 0),
+            new(2, 1, 0),
+            new(3, 0, 0),
+            new(4, 0, 0),
+
+        ];
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, preferredPath));
 
             // Assert
             Assert.Equal(5, emittedEvents.Count);
-            var from = startPosition;
+            GamePosition from = startPosition;
             for (int i = 0; i < 5; i++)
             {
                 Assert.IsType<CharacterSteppedEvent>(emittedEvents[i]);
@@ -234,7 +237,7 @@ namespace DarkEyes.Backend.Tests.Integration
             GameStore store = new();
             store.World.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            var walkability = new bool[,]
+            bool[,] walkability = new bool[,]
             {
                 { true, true, true, true, true },
                 { true, true, true, true, true },
@@ -242,7 +245,7 @@ namespace DarkEyes.Backend.Tests.Integration
                 { true, true, true, true, true },
                 { true, true, true, true, true }
             };
-            var cost = new int[,]
+            int[,] cost = new int[,]
             {
                 { 1, 1, 1, 1, 1 },
                 { 1, 1, 1, 1, 1 },
@@ -256,22 +259,23 @@ namespace DarkEyes.Backend.Tests.Integration
             GameOrchestrator orchestrator = new(router, store, new NoopLogger());
 
             List<GamePosition> preferredPath =
+
             [
                 new(0, 1, 0),
-                new(1, 1, 0),
-                new(2, 1, 0)
+            new(1, 1, 0),
+            new(2, 1, 0)
             ];
 
             List<IGameEvent> emittedEvents = [];
-            using var subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
+            using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
 
             // Act
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, preferredPath));
 
             // Assert
             Assert.Equal(4, emittedEvents.Count);
-            var from = startPosition;
-            foreach (var ev in emittedEvents)
+            GamePosition from = startPosition;
+            foreach (IGameEvent ev in emittedEvents)
             {
                 Assert.IsType<CharacterSteppedEvent>(ev);
                 var emitted = (CharacterSteppedEvent)ev;

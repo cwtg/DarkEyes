@@ -1,4 +1,4 @@
-﻿namespace DarkEyes.Backend.Entities
+namespace DarkEyes.Backend.Entities
 {
     public interface ILogicComponent
     {
