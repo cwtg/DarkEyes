@@ -4,48 +4,41 @@ using DarkEyes.Backend.Core.Stats;
 
 namespace DarkEyes.Backend.Core.Resolution
 {
-    public sealed class SkillCheck(IRandomSource random) : IResolver
+    public sealed class SkillCheck : IResolver
     {
-        private readonly IRandomSource _random = random;
-        private Skill? _relevantSkill;
-
-        public ResolutionResult Result { get; private set; }
-
-        public ResolutionResult Resolve(ResolutionRequest request)
+        public ResolutionResult Resolve(ResolutionRequest request, IRandomSource random)
         {
-            if (request.RelevantStat is not Skill)
-                throw new ArgumentException("Relevant stat must be a skill.", nameof(request));
+            if (request.Subject is not Skill) throw new ArgumentException("Relevant stat must be a skill.", nameof(request));
 
-            _relevantSkill = request.RelevantStat as Skill;
+            var skill = request.Subject as Skill;
 
-            ModifierPipeline.ApplyPreRoll(request);
+            var valSet = new SkillWorkingSet
+            {
+                Skill = ModifierEvaluator.ApplyPreRoll(skill.Value, request.PreRoll, new(skill.Id, skill.Value)),
+                Attribute1 = ModifierEvaluator.ApplyPreRoll(skill.Attribute1.Value, request.PreRoll, new(skill.Attribute1.Id, skill.Attribute1.Value)) + request.ChallengeRating,
+                Attribute2 = ModifierEvaluator.ApplyPreRoll(skill.Attribute2.Value, request.PreRoll, new(skill.Attribute2.Id, skill.Attribute2.Value)) + request.ChallengeRating,
+                Attribute3 = ModifierEvaluator.ApplyPreRoll(skill.Attribute3.Value, request.PreRoll, new(skill.Attribute3.Id, skill.Attribute3.Value)) + request.ChallengeRating
+            };
 
-            if (!AllowCheck()) throw new InvalidOperationException("Skill check cannot be performed due to invalid skill values.");
+            if (!AllowCheck(valSet)) throw new InvalidOperationException("Skill check cannot be performed due to invalid skill values.");
 
-            Result = RollDice();
-            ModifierPipeline.ApplyPostRoll(Result);
-            return Result;
+            ResolutionResult result = RollDice(valSet, random);
+            ModifierEvaluator.ApplyPostRoll(result, request.PostRoll, new(result.Type, result.QualityLevel));
+            return result;
         }
 
-        private bool AllowCheck()
-        {
-            return _relevantSkill is not null
-                && _relevantSkill.Value >= 0
-                && _relevantSkill.Attribute1.Value > 0
-                && _relevantSkill.Attribute2.Value > 0
-                && _relevantSkill.Attribute3.Value > 0;
-        }
+        private static bool AllowCheck(SkillWorkingSet set) => set.Skill >= 0 && set.Attribute1 > 0 && set.Attribute2 > 0 && set.Attribute3 > 0;
 
-        private ResolutionResult RollDice()
+        private static ResolutionResult RollDice(SkillWorkingSet valSet, IRandomSource random)
         {
-            int roll1 = DiceRoll.D20(_random);
-            int roll2 = DiceRoll.D20(_random);
-            int roll3 = DiceRoll.D20(_random);
+            int roll1 = DiceRoll.D20(random);
+            int roll2 = DiceRoll.D20(random);
+            int roll3 = DiceRoll.D20(random);
 
-            int remainingPool = _relevantSkill.Value;
-            remainingPool -= Math.Max(0, _relevantSkill.Attribute1.Value - roll1);
-            remainingPool -= Math.Max(0, _relevantSkill.Attribute2.Value - roll2);
-            remainingPool -= Math.Max(0, _relevantSkill.Attribute3.Value - roll3);
+            int remainingPool = valSet.Skill;
+            remainingPool -= Math.Max(0, roll1 - valSet.Attribute1);
+            remainingPool -= Math.Max(0, roll2 - valSet.Attribute2);
+            remainingPool -= Math.Max(0, roll3 - valSet.Attribute3);
 
             int qualityLevel = Math.Max(1, Math.Min((remainingPool + 2) / 3, 6));
 
@@ -63,5 +56,13 @@ namespace DarkEyes.Backend.Core.Resolution
 
         private static int NumberCount(int number, int val1, int val2, int val3)
             => (val1 == number ? 1 : 0) + (val2 == number ? 1 : 0) + (val3 == number ? 1 : 0);
+    }
+
+    internal ref struct SkillWorkingSet
+    {
+        public int Skill;
+        public int Attribute1;
+        public int Attribute2;
+        public int Attribute3;
     }
 }

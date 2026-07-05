@@ -1,6 +1,8 @@
 using System;
+using DarkEyes.Backend.Commands;
+using DarkEyes.Backend.Events;
 
-namespace DarkEyes.Backend.Abstractions
+namespace DarkEyes.Backend.Rx
 {
     public interface IGameOrchestrator
     {

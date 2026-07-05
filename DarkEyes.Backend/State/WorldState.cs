@@ -18,9 +18,9 @@ namespace DarkEyes.Backend.State
         public INavigationView NavigationSnapshot()
         {
             HashSet<GamePosition> occupied =[];
-            foreach (Entity entity in Entities.GetAll())
+            foreach (EntityId entityId in Entities.GetAll())
             {
-                occupied.Add(entity.Position);
+                occupied.Add(Entities.Get(entityId).Position);
             }
 
             return new NavigationViewSnapshot(NavigationMap, occupied);

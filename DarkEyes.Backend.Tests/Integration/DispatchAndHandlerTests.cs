@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
-using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Commands;
+using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 
@@ -14,7 +15,7 @@ namespace DarkEyes.Backend.Tests.Integration
             // Arrange
             CommandRouter router = new();
             router.Register<TestCommand>((cmd, ctx) => ctx.Emit(new TestEvent()));
-            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -32,7 +33,7 @@ namespace DarkEyes.Backend.Tests.Integration
         {
             // Arrange
             CommandRouter router = new();
-            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -51,7 +52,7 @@ namespace DarkEyes.Backend.Tests.Integration
             // Arrange
             CommandRouter router = new();
             router.Register<TestCommand>((cmd, ctx) => cmd.Dispatcher.Dispatch(cmd));
-            GameOrchestrator orchestrator = new(router, new(), new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);

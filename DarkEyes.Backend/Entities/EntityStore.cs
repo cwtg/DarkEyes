@@ -31,9 +31,9 @@ namespace DarkEyes.Backend.Entities
             mutation(entity);
         }
 
-        public IReadOnlyCollection<Entity> GetAll()
+        public IReadOnlyCollection<EntityId> GetAll()
         {
-            return _entities.Values;
+            return _entities.Keys;
         }
     }
 }

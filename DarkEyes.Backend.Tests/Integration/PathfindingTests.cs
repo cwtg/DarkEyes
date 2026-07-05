@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Commands;
 using DarkEyes.Backend.Entities;
+using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
 using DarkEyes.Backend.Space;
-using DarkEyes.Backend.Space.Commands;
-using DarkEyes.Backend.Space.Events;
+using DarkEyes.Backend.State;
 using Xunit.Abstractions;
 
 namespace DarkEyes.Backend.Tests.Integration
@@ -45,7 +45,7 @@ namespace DarkEyes.Backend.Tests.Integration
             NavigationMap map = new();
             map.Set(walkability, cost);
             store.World.NavigationMap = map;
-            GameOrchestrator orchestrator = new(router, store, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, store, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -99,7 +99,7 @@ namespace DarkEyes.Backend.Tests.Integration
             NavigationMap map = new();
             map.Set(walkability, cost);
             store.World.NavigationMap = map;
-            GameOrchestrator orchestrator = new(router, store, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, store, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -108,7 +108,6 @@ namespace DarkEyes.Backend.Tests.Integration
             orchestrator.Dispatch(new MoveCharacterCommand(id, endPosition, null));
 
             // Assert
-            Assert.Single(emittedEvents);
             Assert.Single(emittedEvents);
             Assert.IsType<ErrorRaisedEvent>(emittedEvents[0]);
         }
@@ -145,7 +144,7 @@ namespace DarkEyes.Backend.Tests.Integration
             NavigationMap map = new();
             map.Set(walkability, cost);
             store.World.NavigationMap = map;
-            GameOrchestrator orchestrator = new(router, store, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, store, new(), new NoopLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -190,7 +189,7 @@ namespace DarkEyes.Backend.Tests.Integration
             NavigationMap map = new();
             map.Set(walkability, cost);
             store.World.NavigationMap = map;
-            GameOrchestrator orchestrator = new(router, store, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, store, new(), new NoopLogger());
 
             List<GamePosition> preferredPath =
 
@@ -256,7 +255,7 @@ namespace DarkEyes.Backend.Tests.Integration
             NavigationMap map = new();
             map.Set(walkability, cost);
             store.World.NavigationMap = map;
-            GameOrchestrator orchestrator = new(router, store, new NoopLogger());
+            GameOrchestrator orchestrator = new(router, store, new(), new NoopLogger());
 
             List<GamePosition> preferredPath =
 

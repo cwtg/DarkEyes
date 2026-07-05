@@ -1,7 +1,6 @@
-using DarkEyes.Backend.Abstractions;
+using DarkEyes.Backend.Commands;
 using DarkEyes.Backend.Logging;
 using DarkEyes.Backend.Rx;
-using DarkEyes.Backend.Space.Commands;
 
 namespace DarkEyes.Backend
 {
@@ -19,7 +18,7 @@ namespace DarkEyes.Backend
         public IGameOrchestrator Build()
         {
             RegisterHandlers();
-            return new GameOrchestrator(router, new(), logger);
+            return new GameOrchestrator(router, new(), new(), logger);
         }
 
         private void RegisterHandlers()

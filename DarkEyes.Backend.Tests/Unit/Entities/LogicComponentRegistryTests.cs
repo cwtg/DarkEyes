@@ -5,7 +5,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
     public sealed class LogicComponentRegistryTests
     {
         [Fact]
-        public void Should_ResolveComponent_When_Regsitered()
+        public void Should_ResolveComponent_When_Registered()
         {
             // Arrange
             string id = "comp1";
@@ -20,7 +20,7 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
         }
 
         [Fact]
-        public void Should_NotResolveComponent_When_NotRegsitered()
+        public void Should_NotResolveComponent_When_NotRegistered()
         {
             // Arrange
             string id = "comp1";
@@ -33,9 +33,9 @@ namespace DarkEyes.Backend.Tests.Unit.Entities
             Assert.Null(retrieved);
         }
     }
-}
 
-sealed file class TestLogicComponent(string id) : ILogicComponent
-{
-    public string ComponentId { get; } = id;
+    sealed file class TestLogicComponent(string id) : ILogicComponent
+    {
+        public string ComponentId { get; } = id;
+    }
 }

@@ -20,7 +20,7 @@ namespace DarkEyes.Backend.Entities
             return _registry[id];
         }
 
-        public bool TryResolve(string id, out ILogicComponent logicComponent)
+        public bool TryResolve(string id, out ILogicComponent? logicComponent)
         {
             return _registry.TryGetValue(id, out logicComponent);
         }

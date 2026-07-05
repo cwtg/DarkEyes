@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DarkEyes.Backend.Commands;
 using DarkEyes.Backend.Entities;
-using DarkEyes.Backend.Rx;
-using DarkEyes.Backend.Space.Events;
+using DarkEyes.Backend.Events;
+using DarkEyes.Backend.Space;
 using DarkEyes.Backend.Space.Pathfinding;
 
-namespace DarkEyes.Backend.Space.Commands
+namespace DarkEyes.Backend.Rx
 {
     public sealed class MoveCharacterHandler : ICommandHandler<MoveCharacterCommand>
     {

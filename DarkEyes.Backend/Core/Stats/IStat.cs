@@ -4,6 +4,6 @@ namespace DarkEyes.Backend.Core.Stats
     {
         public StatId Id { get; }
 
-        public int Value { get; set; }
+        public int Value { get; }
     }
 }

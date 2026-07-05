@@ -1,13 +1,8 @@
 namespace DarkEyes.Backend.Core.Stats
 {
-    public sealed class Attribute(StatId id) : IStat
+    public sealed class Attribute(StatId id, int value) : IStat
     {
         public StatId Id { get; } = id;
-        public int Value { get; set; }
-
-        public void SetValue(int val)
-        {
-            Value = val;
-        }
+        public int Value { get; } = value;
     }
 }

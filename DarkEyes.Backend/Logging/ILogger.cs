@@ -1,4 +1,4 @@
-namespace DarkEyes.Backend.Abstractions
+namespace DarkEyes.Backend.Logging
 {
     public enum LogLevel
     {
@@ -10,6 +10,6 @@ namespace DarkEyes.Backend.Abstractions
 
     public interface ILogger
     {
-        public void Log(LogLevel lvel, string message);
+        public void Log(LogLevel level, string message);
     }
 }
