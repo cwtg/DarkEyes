@@ -1,4 +1,3 @@
-using DarkEyes.Backend.Commands;
 using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Handlers;
 using DarkEyes.Backend.Logging;

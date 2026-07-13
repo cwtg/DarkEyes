@@ -1,7 +1,6 @@
 using DarkEyes.Backend.Entities;
-using DarkEyes.Backend.Handlers;
 
-namespace DarkEyes.Backend.Commands
+namespace DarkEyes.Backend.Handlers
 {
     public sealed class OpenContainerCommand(EntityId containerId, EntityId actorId) : ICommand
     {

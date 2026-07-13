@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using DarkEyes.Backend.Commands;
 using DarkEyes.Backend.Core.Modifiers;
 using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Core.Resolution.Outcomes;
@@ -36,6 +35,11 @@ namespace DarkEyes.Backend.Handlers
                     return;
                 }
                 containerState = containerStateObj as LockedContainerState;
+                if (!containerState.Locked)
+                {
+                    context.Emit(new ErrorRaisedEvent("Container already unlocked"));
+                    return;
+                }
 
                 if (!actor.States.TryGetValue(typeof(CharacterStats), out object? actorStatsObj))
                 {
