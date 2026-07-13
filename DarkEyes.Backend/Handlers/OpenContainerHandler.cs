@@ -21,8 +21,8 @@ namespace DarkEyes.Backend.Handlers
             // Validate
             try
             {
-                Entity container = context.Store.World.Entities.Get(command.ContainerId);
-                Entity actor = context.Store.World.Entities.Get(command.ActorId);
+                Entity container = context.Store.ActiveLocation.Entities.Get(command.ContainerId);
+                Entity actor = context.Store.ActiveLocation.Entities.Get(command.ActorId);
 
                 if (actor.Position.DistanceTo(container.Position) > 1)
                 {
@@ -68,7 +68,7 @@ namespace DarkEyes.Backend.Handlers
             ChestOutcomeMapping outcomeMapping = new();
             if (outcomeMapping.Map(result)) {
                 LockedContainerState unlockedContainer = containerState!.Unlock();
-                context.Store.World.Entities.MutateEntity(command.ContainerId, entity => entity.WithState(unlockedContainer));
+                context.Store.ActiveLocation.Entities.MutateEntity(command.ContainerId, entity => entity.WithState(unlockedContainer));
                 context.Emit(new ContainerUnlockEvent());
             } else
             {

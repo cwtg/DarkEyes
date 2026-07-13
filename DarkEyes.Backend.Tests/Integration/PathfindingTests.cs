@@ -24,27 +24,27 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            bool[,] walkability = new bool[,]
-            {
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-            };
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
@@ -78,27 +78,27 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            bool[,] walkability = new bool[,]
-            {
-                { true, true, false, true, true },
-                { true, true, false, true, true },
-                { false, false, false, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-            };
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true, false, true, true ],
+                [ true, true, false, true, true ],
+                [ false, false, false, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
@@ -123,27 +123,27 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            bool[,] walkability = new bool[,]
-            {
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-            };
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
@@ -154,7 +154,7 @@ namespace DarkEyes.Backend.Tests.Integration
 
             // Assert
             Assert.Empty(emittedEvents);
-            Assert.Equal(endPosition, store.World.Entities.Get(id).Position);
+            Assert.Equal(endPosition, store.ActiveLocation.Entities.Get(id).Position);
         }
 
         [Fact]
@@ -168,39 +168,37 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            bool[,] walkability = new bool[,]
-            {
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-            };
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<GamePosition> preferredPath =
-
             [
                 new(0, 1, 0),
-            new(1, 1, 0),
-            new(2, 1, 0),
-            new(3, 0, 0),
-            new(4, 0, 0),
-
-        ];
+                new(1, 1, 0),
+                new(2, 1, 0),
+                new(3, 0, 0),
+                new(4, 0, 0),
+            ];
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -234,35 +232,34 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
 
-            bool[,] walkability = new bool[,]
-            {
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true },
-                { true, true, true, true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-                { 1, 1, 1, 1, 1 },
-            };
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ],
+                [ true, true, true, true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+                [ 1, 1, 1, 1, 1 ],
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<GamePosition> preferredPath =
-
             [
                 new(0, 1, 0),
-            new(1, 1, 0),
-            new(2, 1, 0)
+                new(1, 1, 0),
+                new(2, 1, 0)
             ];
 
             List<IGameEvent> emittedEvents = [];

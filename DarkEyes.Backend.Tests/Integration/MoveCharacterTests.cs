@@ -24,22 +24,22 @@ namespace DarkEyes.Backend.Tests.Integration
             CommandRouter router = new();
             router.Register<MoveCharacterCommand>(new MoveCharacterHandler().Handle);
             GameStore store = new();
-            store.World.Entities.Add(new Entity(id, startPosition, new(), null));
-            store.World.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), new(), null));
-            store.World.Entities.Add(new Entity(new("other"), new(-1, 0, 1), new(), null));
-            bool[,] walkability = new bool[,]
-            {
-                { true, true },
-                { true, true }
-            };
-            int[,] cost = new int[,]
-            {
-                { 1, 1 },
-                { 1, 1 }
-            };
+            store.ActiveLocation.Entities.Add(new Entity(id, startPosition, new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(new("entity2"), new(2, 2, 0), new(), null));
+            store.ActiveLocation.Entities.Add(new Entity(new("other"), new(-1, 0, 1), new(), null));
+            IReadOnlyList<IReadOnlyList<bool>> walkability =
+            [
+                [ true, true ],
+                [ true, true ]
+            ];
+            IReadOnlyList<IReadOnlyList<int>> cost =
+            [
+                [ 1, 1 ],
+                [ 1, 1 ]
+            ];
             NavigationMap map = new();
             map.Set(walkability, cost);
-            store.World.NavigationMap = map;
+            store.ActiveLocation.NavigationMap = map;
             GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];

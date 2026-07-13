@@ -14,7 +14,7 @@ namespace DarkEyes.Backend.Handlers
         {
             try
             {
-                Entity entity = context.Store.World.Entities.Get(command.Id);
+                Entity entity = context.Store.ActiveLocation.Entities.Get(command.Id);
 
                 if (entity.Position == command.Target)
                 {
@@ -22,7 +22,7 @@ namespace DarkEyes.Backend.Handlers
                 }
 
                 IReadOnlyList<GamePosition> path = command.PreferredPath ?? [];
-                INavigationView navigationView = context.Store.World.NavigationSnapshot();
+                INavigationView navigationView = context.Store.ActiveLocation.NavigationSnapshot();
                 if (!ValidateHint(entity.Position, path, command.Target, navigationView, entity.MovementProfile))
                 {
                     path = Pathfinder.FindPath(entity.Position, command.Target, navigationView, entity.MovementProfile);
@@ -43,7 +43,7 @@ namespace DarkEyes.Backend.Handlers
                         return;
                     }
 
-                    context.Store.World.ChangePosition(command.Id, cell);
+                    context.Store.ActiveLocation.ChangePosition(command.Id, cell);
 
                     context.Emit(new CharacterSteppedEvent(command.Id, from, cell, cellContext));
                     from = cell;
