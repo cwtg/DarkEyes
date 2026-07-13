@@ -25,10 +25,11 @@ namespace DarkEyes.Backend.Entities
             _entities.Add(entity.Id, entity);
         }
 
-        public void MutateEntity(EntityId id, Action<Entity> mutation)
+        public void MutateEntity(EntityId id, Func<Entity, Entity> mutation)
         {
             Entity entity = GetRef(id);
-            mutation(entity);
+            entity = mutation(entity);
+            _entities[id] = entity;
         }
 
         public IReadOnlyCollection<EntityId> GetAll()

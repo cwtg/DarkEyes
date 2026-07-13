@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using DarkEyes.Backend.Commands;
+using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Events;
+using DarkEyes.Backend.Handlers;
 using DarkEyes.Backend.Logging;
-using DarkEyes.Backend.Rx;
+using DarkEyes.Backend.Orchestration;
 
 namespace DarkEyes.Backend.Tests.Integration
 {
@@ -15,7 +16,7 @@ namespace DarkEyes.Backend.Tests.Integration
             // Arrange
             CommandRouter router = new();
             router.Register<TestCommand>((cmd, ctx) => ctx.Emit(new TestEvent()));
-            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -33,7 +34,7 @@ namespace DarkEyes.Backend.Tests.Integration
         {
             // Arrange
             CommandRouter router = new();
-            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
+            GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -51,8 +52,8 @@ namespace DarkEyes.Backend.Tests.Integration
         {
             // Arrange
             CommandRouter router = new();
-            router.Register<TestCommand>((cmd, ctx) => cmd.Dispatcher.Dispatch(cmd));
-            GameOrchestrator orchestrator = new(router, new(), new(), new NoopLogger());
+            router.Register<TestCommand>((cmd, ctx) => cmd.Dispatcher!.Dispatch(cmd));
+            GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
 
             List<IGameEvent> emittedEvents = [];
             using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -67,7 +68,7 @@ namespace DarkEyes.Backend.Tests.Integration
 
     sealed file class TestCommand(IGameOrchestrator? dispatcher = null) : ICommand
     {
-        public IGameOrchestrator Dispatcher = dispatcher;
+        public IGameOrchestrator? Dispatcher = dispatcher;
     }
 
     sealed file class TestEvent : IGameEvent { }

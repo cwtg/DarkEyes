@@ -2,16 +2,6 @@ using System;
 
 namespace DarkEyes.Backend.Core.Resolution
 {
-    public enum ResultType : byte
-    {
-        CriticalBlunder,
-        Blunder,
-        Failed,
-        Success,
-        CriticalSuccess,
-        SuperCriticalSuccess,
-    }
-
     public readonly struct ResolutionResult(ResultType type, int qualityLevel)
     {
         public ResultType Type { get; } = type;
@@ -21,5 +11,7 @@ namespace DarkEyes.Backend.Core.Resolution
         : qualityLevel;
 
         public override string ToString() => $"{nameof(Type)} with quality level {QualityLevel}";
+
+        public bool IsSuccess => Type == ResultType.Success || Type == ResultType.CriticalSuccess || Type == ResultType.SuperCriticalSuccess;
     }
 }

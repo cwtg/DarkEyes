@@ -12,7 +12,7 @@ namespace DarkEyes.Backend.Space
         (-1, 0), (-1, 1), (0, 1)
         ];
 
-        List<GamePosition> neighbors =[];
+        List<GamePosition> neighbors = [];
         foreach ((int dQ, int dR) in hexDirections)
         {
             neighbors.Add(new GamePosition(Q + dQ, R + dR, Level));

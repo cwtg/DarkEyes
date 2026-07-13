@@ -1,5 +1,6 @@
 using System;
-using DarkEyes.Backend.Core.Modifier;
+using System.Collections.Generic;
+using DarkEyes.Backend.Core.Modifiers;
 using DarkEyes.Backend.Core.Stats;
 
 namespace DarkEyes.Backend.Core.Resolution
@@ -8,23 +9,22 @@ namespace DarkEyes.Backend.Core.Resolution
     {
         public ResolutionResult Resolve(ResolutionRequest request, IRandomSource random)
         {
-            if (request.Subject is not Skill) throw new ArgumentException("Relevant stat must be a skill.", nameof(request));
+            if (request.Subject is not Skill skill) 
+                throw new ArgumentException("Relevant stat must be a skill.", nameof(request));
 
-            var skill = request.Subject as Skill;
+            IReadOnlyList<IModifier> modifiers = request.Modifiers ?? [];
 
             var valSet = new SkillWorkingSet
             {
-                Skill = ModifierEvaluator.ApplyPreRoll(skill.Value, request.PreRoll, new(skill.Id, skill.Value)),
-                Attribute1 = ModifierEvaluator.ApplyPreRoll(skill.Attribute1.Value, request.PreRoll, new(skill.Attribute1.Id, skill.Attribute1.Value)) + request.ChallengeRating,
-                Attribute2 = ModifierEvaluator.ApplyPreRoll(skill.Attribute2.Value, request.PreRoll, new(skill.Attribute2.Id, skill.Attribute2.Value)) + request.ChallengeRating,
-                Attribute3 = ModifierEvaluator.ApplyPreRoll(skill.Attribute3.Value, request.PreRoll, new(skill.Attribute3.Id, skill.Attribute3.Value)) + request.ChallengeRating
+                Skill = ModifierEvaluator.ApplyModifiers(skill.Value, modifiers, new(skill.Id)),
+                Attribute1 = ModifierEvaluator.ApplyModifiers(skill.Attribute1.Value, modifiers, new(skill.Attribute1.Id)),
+                Attribute2 = ModifierEvaluator.ApplyModifiers(skill.Attribute2.Value, modifiers, new(skill.Attribute2.Id)),
+                Attribute3 = ModifierEvaluator.ApplyModifiers(skill.Attribute3.Value, modifiers, new(skill.Attribute3.Id))
             };
 
             if (!AllowCheck(valSet)) throw new InvalidOperationException("Skill check cannot be performed due to invalid skill values.");
 
-            ResolutionResult result = RollDice(valSet, random);
-            ModifierEvaluator.ApplyPostRoll(result, request.PostRoll, new(result.Type, result.QualityLevel));
-            return result;
+            return RollDice(valSet, random);
         }
 
         private static bool AllowCheck(SkillWorkingSet set) => set.Skill >= 0 && set.Attribute1 > 0 && set.Attribute2 > 0 && set.Attribute3 > 0;
