@@ -37,7 +37,7 @@ Build/test: `dotnet build DarkEyes.sln`, `dotnet test DarkEyes.sln`.
 - The backend never considers animations. The frontend has a step player with registered presenters and two presentation regimes (clock-driven in real time, step-driven in rounds/dialogue).
 
 **Determinism**
-- Same state + seed + inputs = same result. All randomness through `IRandomSource`, backed by our **own PRNG**, with **separate streams per domain** (rules, each AI controller, content) stored in the state. No `System.Random`, wall-clock time or `Guid.NewGuid()` in logic.
+- Same state + seed + inputs = same result. All randomness through `IRandomSource`, backed by our **own PRNG**, with **separate streams per random consumer** (rule resolution, each AI controller, content, story; a consumer is a part whose draw count changes independently of the others) stored in the state. No `System.Random`, wall-clock time or `Guid.NewGuid()` in logic.
 - **Execution order is a rule decision**, with a stable engine fallback (priority → sequence number → ordinal ID). Components are keyed by **stable name**, not `Type`.
 - Concretely: `ImmutableDictionary`/`HashSet` only for lookup, **never enumerate them** where order can matter; use `ImmutableSortedDictionary` with `StringComparer.Ordinal` (or integer keys) instead. Always pass ordinal comparers; never culture-default string comparison. Sort only with full tie-breaking (`OrderBy`/`ThenBy`). Enforced by **BannedApiAnalyzers** (`System.Random`, `DateTime.Now`, `Guid.NewGuid`, culture-default comparison, comparer-less `Sort`). Run a cross-runtime golden test (.NET 9 vs IL2CPP) early.
 - **Integer maths** for anything that affects state; floats only for presentation.

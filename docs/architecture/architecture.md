@@ -100,7 +100,7 @@ flowchart LR
 |---|---|
 | Single source of truth | The backend owns one **immutable state tree** (Redux-like). |
 | Unidirectional, comprehensible flow | Actions → effects → ops → new state → commit result (events + patches) → frontend. |
-| Determinism | All randomness through serializable PRNG streams (one per domain) in the state; time only as input; IDs from a counter in the state; execution order defined by the rules, with a stable engine fallback. |
+| Determinism | All randomness through serializable PRNG streams (one per random consumer) in the state; time only as input; IDs from a counter in the state; execution order defined by the rules, with a stable engine fallback. |
 | Frontend consistency without logic duplication | Frontend keeps a **mirror** updated only by **patches** generated centrally by **diffing projections**; rule-dependent previews call backend queries. |
 | Information hiding | Patches come from the observer's **projection**; events pass through the **observer view**; knowledge is ordinary state (tags/components). |
 | Rule separability | **Backend** (engine + generic gameplay) + **rule module** with only the DSA5-specific mechanics (separate assembly, plug-in via registration). |
@@ -253,7 +253,7 @@ flowchart LR
 ### 8.2 Change pipeline and authority
 - **Actions** (player, AI): attempts by an actor; rule-checked.
 - **An action is one act of one actor (or the party as a group) as the rules define it.** The backend executes exactly what was dispatched and never adds acts the actor didn't choose. An act's execution may span many steps or game time (movement steps cell by cell, ongoing activities); that is one act, not a chain. Consequences the rules impose are effects or triggers; optional responses are `Decide` for the responding actor. What counts as one act is decided by the rules, not by convenience. Composing acts (convenience, automation, standing orders, auto-answers) is the caller's job: the frontend or an AI controller sends ordinary actions, each validated and committed on its own. Composed plans are planning state: not atomic, not saved; replays stay exact because the input log holds the individual actions.
-- **Effects** (scheduler, story, reactions, debug, and action outcomes): decreed domain changes that enforce invariants.
+- **Effects** (scheduler, story, reactions, debug, and action outcomes): decreed changes in game terms (e.g. `Unlock(chest)`, `Damage(target, 5)`) that enforce invariants and are translated into ops.
 - **Ops**: record-level writes (`SetComponent`, `AddEntity`, …).
 - Authority is enforced by **entry points**: the public dispatcher accepts only actions; effects can only be submitted through the handler context.
 - Every commit records its **origin** (Player, AI, Scheduler, Story, Debug). The debug entry point is not part of the public gameplay API.
@@ -307,7 +307,7 @@ flowchart LR
 
 ### 8.8 Determinism and randomness
 - Own small PRNG (e.g. PCG32 / xoshiro128\*\*), identical on .NET 9 and Unity; its state lives in the state tree and in saves.
-- **Separate streams per domain** (rules dice, each AI controller, content such as loot and encounters), derived from the master seed, so a change in one domain never shifts another's rolls. AI look-ahead runs on state copies.
+- **Separate streams per random consumer** (rule resolution, each AI controller, content such as loot and encounters, story/Yarn saliency), derived from the master seed, so a change in one consumer never shifts another's rolls. AI look-ahead runs on state copies.
 - **Execution order is a rule decision** (ADR-021): wherever order can affect the outcome (turn order, simultaneous triggers, several reactions to one event, area effects on several targets, several perception checks, NPCs acting at the same time, several story triggers on one event), the rules define it. Where they are silent, the engine applies a stable fallback (priority → sequence number from the state → ordinal ID). Never hash-based iteration order (.NET 9 randomizes string hashes per process, Mono/IL2CPP doesn't). Reproducibility also applies to save output, patch/event order and content loading. Components are keyed by stable name, not `Type`.
 - Concrete rules: `ImmutableDictionary`/`ImmutableHashSet`/`HashSet` are for lookup only and are never enumerated where order can matter; ordered maps use `ImmutableSortedDictionary` with `StringComparer.Ordinal` (or integer keys). Comparers are always explicit and ordinal (culture-default comparison depends on the machine's locale). Sorting only with full tie-breaking (`OrderBy`/`ThenBy`; `List.Sort` is unstable). **BannedApiAnalyzers** reject `System.Random`, `DateTime.Now`, `Guid.NewGuid`, culture-default string comparison and comparer-less `Sort`. A cross-runtime golden test (.NET 9 vs IL2CPP, Q2) runs early.
 - Yarn's random built-ins are replaced by versions using the state's RNG, and the line-group saliency strategy is always set explicitly (Yarn's random strategies use `System.Random`).
@@ -365,7 +365,7 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 | 012 | No runtime reflection in the backend (IL2CPP stripping). | decided |
 | 013 | Locations authored in the Unity editor and baked to JSON; shared `HexLayout`; named anchors for story. | decided |
 | 014 | Preview paths from backend query, sent back as `PreferredPath`. | decided |
-| 015 | Own PRNG; RNG state in state tree and saves; separate streams per domain. | decided (revised 2026-11-09) |
+| 015 | Own PRNG; RNG state in state tree and saves; separate streams per random consumer. | decided (revised 2026-11-09) |
 | 016 | IDs: content IDs for authored entities, counter for spawns. | decided |
 | 017 | Saves are snapshots (JSON) with format versions; migrations only once formats are stable; codecs via source generator. | decided (generator: spike; revised 2026-11-09) |
 | 018 | Push via BCL `IObservable<CommitResult>`; System.Reactive removed from the backend. | decided |
@@ -520,7 +520,7 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 | Term | Meaning |
 |---|---|
 | **Action** | An actor's attempt (player or AI), rule-checked before it has any effect. |
-| **Effect** | A decreed domain change (from an action outcome, scheduler, story, reaction, debug) that enforces invariants. |
+| **Effect** | A decreed change in game terms (from an action outcome, scheduler, story, reaction, debug) that enforces invariants and is translated into ops. |
 | **Op** | A record-level write to the state; the only way to change it. |
 | **Commit** | The atomic processing of one action or system trigger, producing a new state and a commit result. |
 | **Commit result** | Ordered list of `(event, patches)` steps sent to the frontend. |
@@ -538,6 +538,7 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 | **Definition / instance** | Static content template (`EntityDef`) vs. runtime entity referring to it. |
 | **Anchor** | A named, stable marker in a location used by story content instead of coordinates. |
 | **Bake** | Converting a Unity location scene into location JSON. |
+| **Random consumer** | A part of the game whose number of random draws can change independently of the others, and which therefore gets its own PRNG stream derived from the master seed: rule resolution (checks, damage), each AI controller, content generation (loot, encounters), story (Yarn saliency). This keeps a change in one from shifting another's rolls. For example, tuning AI look-ahead must not change combat dice. A new stream is justified whenever a subsystem draws on its own schedule. |
 | **Rule module** | The assembly containing only the DSA5-specific (trademarked) mechanics, plugged into the backend. |
 | **Pace (*Schritt*)** | DSA distance unit (≈ 1 m); tentatively 3 hexes per pace. |
 | **Combat round (*Kampfrunde*, KR)** | DSA5 unit of combat time; one round in turn-based mode. |
