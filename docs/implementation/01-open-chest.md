@@ -100,14 +100,15 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 
 ## Status
 
-- **2026-11-09:** steps 1–4 are green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: observer-view policies for events, component visibility policies. The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); steps 4–5 may need "component added" for lock state.
+- **2026-11-09:** steps 1–4, 5a and 5b are green (`Integration/Containers/`, `Integration/Locks/`, `Integration/LockPicking/`, `Integration/Pipeline/`, `Unit/Randomness/`). Not built yet, by design: observer-view policies for events, component visibility policies. The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); steps 4–5 may need "component added" for lock state.
 - **Deferred from the review of step 5a:**
   - **Visibility of locks and containers:** if `Lock` or `ContainerState` ever get a visibility policy, their *presence* must stay visible and only the value may be hidden; otherwise a compliant frontend can't know that a target has no lock, and §8.9 makes that throw.
   - **Check request and result may grow:** situational inputs that aren't in the state (e.g. a chosen tool) and result flags (critical, blunder) when an act needs them.
   - **Mandatory check service:** the rule module's registration entry point should make the check service mandatory, so a missing `UseChecks` doesn't only surface at the first check.
+- **Deferred to the persistence story (review of step 5b):** saves write `ulong` stream states as hex strings, since JSON tools that read numbers as doubles corrupt values above 2^53.
 - **Deferred (line = projection, §8.9):** today the projection equals the truth, so the range check against the true positions is equivalent. Once perception or remembered knowledge exists, validation must be measured against the observer's last projection (existence and remembered position). That also covers "no leaks".
 - **Deferred from the review of step 1:**
   - **Unity dependencies:** `System.Collections.Immutable` 10.0.11 pulls in `System.Memory` 4.6.3 and `System.Runtime.CompilerServices.Unsafe` 6.1.2; only Immutable is copied to `Assets/Plugins`. Check in the Unity editor (dependency spike, at the latest with the walking skeleton): copy the dependencies or pick versions matching what Unity ships.
   - **Value equality of collections in records** (`Step.Patches`, `CommitResult.Steps`, `EntityAppeared.Components`, entity maps): decide when replay checks, golden tests or the mirror == projection comparison need it.
   - **Re-entrancy guard** on `GameStore.Dispatch`: add together with the `IObservable` push (the first way to re-enter), with a test.
-- Next: step 5 (`PickLockAction`, rule module, PRNG).
+- Next: step 5c (rule-module assembly, `Dsa5Checks` with the 3d20 check moved from `Core/Resolution`, DSA5 check of the difficulty sign).

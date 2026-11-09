@@ -1,8 +1,11 @@
+using DarkEyes.Backend.Randomness;
 using DarkEyes.Backend.State;
 
 namespace DarkEyes.Backend.Pipeline;
 
 /// <summary>A record-level write to the state.</summary>
-internal abstract record Op(EntityId Entity);
+internal abstract record Op;
 
-internal sealed record SetComponentOp(EntityId Entity, ComponentKey Key, object Component) : Op(Entity);
+internal sealed record SetComponentOp(EntityId Entity, ComponentKey Key, object Component) : Op;
+
+internal sealed record SetRandomStreamOp(RandomStreamId Stream, Pcg32State State) : Op;

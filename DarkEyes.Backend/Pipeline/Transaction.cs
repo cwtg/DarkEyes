@@ -18,12 +18,19 @@ internal sealed class Transaction(GameState state, Projection sent)
 
     public void Apply(Op op)
     {
-        State = op switch
+        switch (op)
         {
-            SetComponentOp set => State.WithEntity(State.GetEntity(set.Entity).With(set.Key, set.Component)),
-            _ => throw new InvalidOperationException($"Unknown op {op.GetType().Name}."),
-        };
-        _dirty.Add(op.Entity);
+            case SetComponentOp set:
+                State = State.WithEntity(State.GetEntity(set.Entity).With(set.Key, set.Component));
+                _dirty.Add(set.Entity);
+                break;
+            case SetRandomStreamOp stream:
+                // Hidden non-entity state, not part of any projection, so nothing becomes dirty.
+                State = State.WithRandomStream(stream.Stream, stream.State);
+                break;
+            default:
+                throw new InvalidOperationException($"Unknown op {op.GetType().Name}.");
+        }
     }
 
     /// <summary>Closes the current step: the event plus the patches caused by the ops since the previous event.</summary>
@@ -35,6 +42,10 @@ internal sealed class Transaction(GameState state, Projection sent)
         _steps.Add(new Step(gameEvent, patches));
     }
 
+    /// <summary>
+    /// Ends the transaction. Changes to entities must be explained by an event; changes to hidden state
+    /// (e.g. a check that only advanced a random stream) need none.
+    /// </summary>
     public CommitResult Complete()
     {
         if (_dirty.Count > 0)

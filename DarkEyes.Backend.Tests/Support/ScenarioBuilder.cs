@@ -14,6 +14,14 @@ internal sealed class ScenarioBuilder
 {
     private GameState _state = GameState.Empty;
     private IChecks? _checks;
+    private ulong _masterSeed;
+
+    /// <summary>The master seed; scenarios without one use seed 0.</summary>
+    public ScenarioBuilder WithSeed(ulong masterSeed)
+    {
+        _masterSeed = masterSeed;
+        return this;
+    }
 
     public ScenarioBuilder WithHero(EntityId id, GamePosition at)
     {
@@ -45,7 +53,7 @@ internal sealed class ScenarioBuilder
             builder.UseChecks(_checks);
         }
 
-        return builder.Build(_state);
+        return builder.Build(_state.WithMasterSeed(_masterSeed));
     }
 
     private ScenarioBuilder Add(Entity entity)

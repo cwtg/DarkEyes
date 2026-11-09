@@ -1,4 +1,5 @@
 using DarkEyes.Backend.Pipeline;
+using DarkEyes.Backend.Randomness;
 using DarkEyes.Backend.State;
 
 namespace DarkEyes.Backend.Checks;
@@ -14,6 +15,9 @@ public sealed class CheckContext
     }
 
     public GameState State => _chain.Transaction.State;
+
+    /// <summary>The rule resolution stream; every draw is part of the chain and committed or discarded with it.</summary>
+    public IRandomSource Random => new TransactionRandomSource(_chain.Transaction, RandomStreamIds.Rules);
 
     public void Submit(IEffect effect) => _chain.Submit(effect);
 

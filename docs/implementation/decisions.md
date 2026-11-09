@@ -41,3 +41,12 @@ Agreed with the user before starting story 01.
 
 - An effect whose target state already holds does nothing (no op, no event), e.g. `UnlockEffect` on an unlocked lock or `OpenContainerEffect` on an open container.
 - **Why:** effects are decreed and can't be refused (§8.2), and a rejection there would be late (§8.9); decreeing callers such as the story need no check first.
+
+## 2026-11-09: PRNG and stream derivation
+
+- **PCG32** (XSH RR, as in the reference implementation): 64-bit state + increment, integer-only, reference output as a golden test. Bounded values by rejection sampling (no modulo bias).
+- **Stream seeds:** `hash = FNV-1a-64(stream ID, UTF-8)`; `PCG32.Seed(initialState: SplitMix64(masterSeed ^ hash), sequence: SplitMix64(hash))`. Streams are created on first use; the state holds the master seed and the streams used so far, so adding a random consumer needs no migration and shifts nothing.
+- **Every draw is an op** in the transaction: discarded with the chain, and re-runs (`Decide`) reproduce the same rolls. The master seed can't change once a stream has been used.
+- Stream IDs live in one catalog (`Randomness/RandomStreamIds`).
+- Stream state (master seed, streams, PCG32) is internal to the backend: whoever can read it can predict rolls. Game code, the rule module and AIs draw only through `IRandomSource`. The seed derivation is pinned by a golden test, since changing it would change every new game and every stream derived later from old saves.
+- **No default seed:** a new game must set the master seed (entropy comes from outside the backend: clock and `Guid` are banned in logic); rolling without one throws, so a forgotten seed can't ship identical dice in every game. Test scenarios default to seed 0.
