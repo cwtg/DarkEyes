@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Reactive" />
+    <PackageReference Include="YarnSpinner" />
+  </ItemGroup>
+
+  <Target Name="CopyToUnityPlugins" AfterTargets="Build">
+    <PropertyGroup>
+      <UnityPluginsDir>$(MSBuildProjectDirectory)\..\DarkEyes.Unity\Assets\Plugins\</UnityPluginsDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <BackendOutput Include="$(TargetPath)" />
+      <BackendDeps Include="$(OutputPath)**\System.Reactive.dll" />
+    </ItemGroup>
+
+    <MakeDir Directories="$(UnityPluginsDir)" />
+
+    <Copy SourceFiles="@(BackendOutput)" DestinationFolder="$(UnityPluginsDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+
+    <Copy SourceFiles="@(BackendDeps)" DestinationFolder="$(UnityPluginsDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+
+    <Message Importance="high" Text="Copied backend DLL + deps to $(UnityPluginsDir)" />
+  </Target>
+
+</Project>

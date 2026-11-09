@@ -1,0 +1,19 @@
+<Project>
+
+  <!-- Shared settings for all projects in DarkEyes.sln. DarkEyes.Unity has its own empty Directory.*.props/targets to stop this from applying to Unity's generated projects. -->
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsDarkEyesTestProject Condition="$(MSBuildProjectName.EndsWith('.Tests'))">true</IsDarkEyesTestProject>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsDarkEyesTestProject)' != 'true'">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>
