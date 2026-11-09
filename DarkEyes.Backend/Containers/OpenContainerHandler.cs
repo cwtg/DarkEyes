@@ -21,7 +21,7 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
 
         if (container.Get(ContainerState.Key).IsOpen)
         {
-            return ContainerRejections.AlreadyOpen();
+            return OpenContainerRejections.AlreadyOpen();
         }
 
         GamePosition actorPosition = context.State.GetEntity(action.Actor).Get(Placement.Key).Position;
@@ -30,13 +30,13 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
         int distance = actorPosition.DistanceTo(containerPosition);
         if (distance > MaxDistance)
         {
-            return ContainerRejections.TooFarAway(distance, MaxDistance);
+            return OpenContainerRejections.TooFarAway(distance, MaxDistance);
         }
 
         // After the range check: from afar, a rejection must not reveal whether something is locked.
         if (container.Has(Lock.Key) && container.Get(Lock.Key).IsLocked)
         {
-            return ContainerRejections.Locked();
+            return OpenContainerRejections.Locked();
         }
 
         context.Submit(new OpenContainerEffect(action.Container, action.Actor));

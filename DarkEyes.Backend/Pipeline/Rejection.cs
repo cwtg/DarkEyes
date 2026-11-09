@@ -7,8 +7,8 @@ using DarkEyes.Backend.State;
 namespace DarkEyes.Backend.Pipeline;
 
 /// <summary>
-/// Why an action was refused: a stable, feature-namespaced reason code plus named arguments.
-/// Features create rejections only through their own factories, which keep code and arguments consistent.
+/// Why an action was refused: a stable, act-namespaced reason code plus named arguments.
+/// Acts create rejections only through their own factories, which keep code and arguments consistent.
 /// Arguments are restricted to simple, deterministic values: <see cref="int"/>, <see cref="bool"/>, <see cref="string"/>, <see cref="EntityId"/>.
 /// </summary>
 public sealed record Rejection
@@ -65,7 +65,7 @@ public sealed record Rejection
         return hash.ToHashCode();
     }
 
-    /// <summary>For logs and test output, e.g. <c>container.too_far_away(distance=3, max=1)</c>.</summary>
+    /// <summary>For logs and test output, e.g. <c>open_container.too_far_away(distance=3, max=1)</c>.</summary>
     public override string ToString()
     {
         IEnumerable<string> arguments = Arguments.Select(argument => FormattableString.Invariant($"{argument.Key}={argument.Value}"));

@@ -46,7 +46,7 @@ public sealed class OpenContainerTests
 
         // Assert
         Rejection rejection = Assert.IsType<Rejected>(result).Reason;
-        Assert.Equal(ContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
+        Assert.Equal(OpenContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
     }
@@ -67,7 +67,7 @@ public sealed class OpenContainerTests
 
         // Assert
         Rejection rejection = Assert.IsType<Rejected>(result).Reason;
-        Assert.Equal(ContainerRejections.AlreadyOpen(), rejection);
+        Assert.Equal(OpenContainerRejections.AlreadyOpen(), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
     }
@@ -88,7 +88,7 @@ public sealed class OpenContainerTests
 
         // Assert
         Rejection rejection = Assert.IsType<Rejected>(result).Reason;
-        Assert.Equal(ContainerRejections.Locked(), rejection);
+        Assert.Equal(OpenContainerRejections.Locked(), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
     }
@@ -107,7 +107,7 @@ public sealed class OpenContainerTests
 
         // Assert
         Rejection rejection = Assert.IsType<Rejected>(result).Reason;
-        Assert.Equal(ContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
+        Assert.Equal(OpenContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
     }
 
     [Fact]
