@@ -11,6 +11,7 @@ Handoff for an implementation session. Agreed with the user on 2026-11-09.
 
 - **Use-case driven, true TDD.** Red → green → refactor, one small step at a time. Test intent through the public API (dispatch → commit result → mirror), not implementation details. Build only what the current test needs.
 - **Strangler: build alongside, replace step by step.** The new core grows in new namespaces next to the old code. Once a use case is ported, delete the old handler and its tests. `main` must build and all tests must pass after every step.
+- This story is the first part of the **walking skeleton** (see `decisions.md`): the following stories build on it until the result can be shown end to end in Unity.
 - This use case is chosen because it forces out the most problematic parts of the current code (see below) while staying small. Movement (pathfinding, scheduler, footprints) is a later, separate use case.
 
 ## Steps

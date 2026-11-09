@@ -80,7 +80,20 @@ The code predates the agreed architecture; architecture doc §11.2 lists the gap
 
 ## Conventions
 
-- `.editorconfig` is binding (Allman braces, `_camelCase` private fields, `s_` static fields, explicit types except when apparent, usings outside namespaces, block-scoped namespaces). Suggest improvements when they're clearly better.
-- Prefer primary constructors, records for value-like data, and strongly-typed IDs (`readonly struct` with `IEquatable`).
-- Tests: xUnit, `Should_<Outcome>_When_<Condition>`, `// Arrange / // Act / // Assert`. Prefer **TDD**; test intent through the public API (integration tests via dispatch) over implementation details. Seeded random sources for anything that rolls dice.
+- `.editorconfig` is binding and **enforced in the build** (warnings are errors): Allman braces, braces always (also for one-line `if`s), `_camelCase` private fields, `s_` static fields, explicit types except when apparent, usings outside namespaces, **file-scoped namespaces**. Style questions are decided by .NET/C# standards, not by Unity's compiler limits. Shared build settings live in `Directory.Build.props`, package versions in `Directory.Packages.props`. No file headers. Suggest improvements when they're clearly better.
+- **Types:** state, components, actions, events and rejections are `sealed record`s; small values (IDs, positions) are `readonly record struct`s; classes only for services/behaviour. Everything `sealed` unless designed for inheritance. Prefer primary constructors.
+- **Collections in state** only as immutable collections (`ImmutableArray`, `ImmutableSortedDictionary`), wrapped in a value-equal type where value equality matters; never `IReadOnlyList`/`IReadOnlyDictionary` in records.
+- **IDs:** `readonly record struct XyzId(string Value)` with validation; reject `default` explicitly where it matters.
+- No public fields; no access modifiers on interface members.
+- **Naming:** actions imperative with suffix (`OpenContainerAction`); events past tense without suffix (`ContainerOpened`); rejections as nouns (`TooFarAway`); content IDs lowercase, dot-separated (`hero.alrik`, `skill.lockpicking`), referenced through constants, never inline strings.
+- **Feature folders** for new code (e.g. `Containers/` holds the action, handler, event and components), not folders per technical kind.
+- Tests: xUnit, `Should_<Outcome>_When_<Condition>`, `// Arrange / // Act / // Assert`. Prefer **TDD**; test intent through the public API (integration tests via dispatch) over implementation details. Rule tests use a **scripted random source** (fixed rolls); real seeds only for determinism and golden tests.
 - English for code, comments, docs and commit messages.
+
+## Implementation workflow
+
+- The user reviews every change before it is committed.
+- Commit guideline: the changes of one commit can be summarized in one sentence, the solution builds, and all tests are green. This is a guideline, not an implementation goal; if it isn't possible for a commit, that's fine.
+- Implementation decisions are settled when they come up. Architecture decisions are settled up front, before coding.
+- General implementation decisions go into `docs/implementation/decisions.md`; story-specific ones go into that story's plan file.
+- Before a session stops, add a short note to the current plan file: where things stand and what comes next.
