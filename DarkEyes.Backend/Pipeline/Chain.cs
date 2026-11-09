@@ -12,16 +12,27 @@ internal sealed class Chain(Transaction transaction, PipelineServices services)
 
     public Transaction Transaction => _transaction;
 
-    /// <summary>Runs the root action. A rejection is pure validation: it is only valid before the first check, submitted effect or emitted event.</summary>
+    /// <summary>
+    /// Runs the root action and returns its rejection, or null if it was carried out; then its outcome is the chain's last event.
+    /// A rejection is pure validation: it is only valid before the first check, submitted effect or emitted event.
+    /// </summary>
     public Reason? Run(IAction root)
     {
-        Reason? rejection = _services.Actions.Handle(root, new ActionContext(this));
-        if (rejection is not null && _changed)
+        ActResult result = _services.Actions.Handle(root, new ActionContext(this))
+            ?? throw new InvalidOperationException($"The handler for {root.GetType().Name} returned no result.");
+        if (result.Rejection is { } rejection)
         {
-            throw new InvalidOperationException($"{root.GetType().Name} was rejected ({rejection}) after it had already run a check, submitted effects or emitted events. Validate before changing anything.");
+            if (_changed)
+            {
+                throw new InvalidOperationException($"{root.GetType().Name} was rejected ({rejection}) after it had already run a check, submitted effects or emitted events. Validate before changing anything.");
+            }
+
+            return rejection;
         }
 
-        return rejection;
+        _transaction.RequireNoUnexplainedChanges();
+        Emit(new ActionCompleted(root, result.Outcome!));
+        return null;
     }
 
     public CheckResult Check(CheckRequest request)

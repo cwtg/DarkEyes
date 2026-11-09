@@ -20,12 +20,16 @@ public sealed class OpenContainerTests
         var mirror = TestMirror.Connect(game);
 
         // Act
-        DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
+        OpenContainerAction open = new(TestIds.Alrik, TestIds.CellarChest);
+        DispatchResult result = game.Dispatch(open);
 
-        // Assert
+        // Assert: the state change, then the act's outcome as the last step
         CommitResult commit = Assert.IsType<Committed>(result).Commit;
         mirror.Apply(commit);
-        Assert.IsType<ContainerOpened>(Assert.Single(commit.Steps).Event);
+        Assert.Equal(2, commit.Steps.Length);
+        Assert.IsType<ContainerOpened>(commit.Steps[0].Event);
+        Assert.Equal(new ActionCompleted(open, ActOutcome.Succeeded), commit.Steps[1].Event);
+        Assert.Empty(commit.Steps[1].Patches);
         Assert.True(mirror.Get(TestIds.CellarChest, ContainerState.Key).IsOpen);
         mirror.AssertMatches(game);
     }
@@ -120,10 +124,14 @@ public sealed class OpenContainerTests
         var mirror = TestMirror.Connect(game);
 
         // Act
-        DispatchResult result = game.Dispatch(new DecreeAction(new OpenContainerEffect(TestIds.CellarChest, TestIds.Alrik)));
+        DecreeAction decree = new(new OpenContainerEffect(TestIds.CellarChest, TestIds.Alrik));
+        DispatchResult result = game.Dispatch(decree);
 
         // Assert
-        Assert.Empty(Assert.IsType<Committed>(result).Commit.Steps);
+        // Assert: the effect emitted nothing; only the decreeing test action reports its outcome, without patches
+        Step step = Assert.Single(Assert.IsType<Committed>(result).Commit.Steps);
+        Assert.Equal(new ActionCompleted(decree, ActOutcome.Succeeded), step.Event);
+        Assert.Empty(step.Patches);
         mirror.AssertMatches(game);
     }
 

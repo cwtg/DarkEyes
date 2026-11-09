@@ -48,11 +48,16 @@ internal sealed class Transaction(GameState state, Projection sent)
     /// </summary>
     public CommitResult Complete()
     {
+        RequireNoUnexplainedChanges();
+        return new CommitResult(_steps.ToImmutable());
+    }
+
+    /// <summary>Entity changes must be explained by an event of their own; a generic outcome event must not take them over.</summary>
+    public void RequireNoUnexplainedChanges()
+    {
         if (_dirty.Count > 0)
         {
             throw new InvalidOperationException($"Ops after the last event on {string.Join(", ", _dirty)}. Every change must be followed by an event.");
         }
-
-        return new CommitResult(_steps.ToImmutable());
     }
 }

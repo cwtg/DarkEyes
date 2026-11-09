@@ -17,10 +17,14 @@ public sealed class UnlockTests
         var mirror = TestMirror.Connect(game);
 
         // Act
-        DispatchResult result = game.Dispatch(new DecreeAction(new UnlockEffect(TestIds.CellarChest, TestIds.Alrik)));
+        DecreeAction decree = new(new UnlockEffect(TestIds.CellarChest, TestIds.Alrik));
+        DispatchResult result = game.Dispatch(decree);
 
         // Assert
-        Assert.Empty(Assert.IsType<Committed>(result).Commit.Steps);
+        // Assert: the effect emitted nothing; only the decreeing test action reports its outcome, without patches
+        Step step = Assert.Single(Assert.IsType<Committed>(result).Commit.Steps);
+        Assert.Equal(new ActionCompleted(decree, ActOutcome.Succeeded), step.Event);
+        Assert.Empty(step.Patches);
         mirror.AssertMatches(game);
     }
 }

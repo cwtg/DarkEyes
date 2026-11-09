@@ -3,7 +3,6 @@
 using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Handlers;
 using DarkEyes.Backend.Logging;
@@ -11,11 +10,10 @@ using DarkEyes.Backend.Store;
 
 namespace DarkEyes.Backend.Orchestration;
 
-public sealed class GameOrchestrator(CommandRouter router, GameStore store, IRandomSource random, IGameLogger logger) : IGameOrchestrator
+public sealed class GameOrchestrator(CommandRouter router, GameStore store, IGameLogger logger) : IGameOrchestrator
 {
     private readonly CommandRouter _router = router;
     private readonly GameStore _store = store;
-    private readonly IRandomSource _random = random;
     private readonly IGameLogger _logger = logger;
 
     private readonly Subject<IGameEvent> _subject = new();
@@ -33,7 +31,7 @@ public sealed class GameOrchestrator(CommandRouter router, GameStore store, IRan
         _dispatching = true;
         try
         {
-            HandlerContext context = new(emit: _subject.OnNext, _store, _random, _logger);
+            HandlerContext context = new(emit: _subject.OnNext, _store, _logger);
             _router.Handle(command, context);
         }
         finally

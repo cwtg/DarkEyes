@@ -507,14 +507,11 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 
 ### 11.2 Technical debt in the current code (as of 2026-11-08)
 
-- State is mutable (`Entity` setters, `LocationState.ChangePosition`, `ItemContainer` inside the `LockedContainerState` record); no single state root; per-location `EntityStore`.
+- State is mutable (`Entity` setters, `LocationState.ChangePosition`); no single state root; per-location `EntityStore`.
 - Handlers write state directly and emit events separately; errors as untyped `ErrorRaisedEvent` strings.
-- The old DSA5 code (`Core/Stats`, `Core/Modifiers`, `Core/Resolution`, `"lockpicking"` in the old `OpenContainerHandler`) is ported to the rule module; the old copy is still in the engine until it is deleted.
-- `System.Random` via `SeededRandomSource`; tests pass `(new Random() as IRandomSource)!`, which is always `null`.
 - `EntityDefId` equality operators and `Equals(object)` compare against `EntityId`; `EntityDef` uses `EntityId`.
 - `NavigationMap`: fixed 2001×2001 matrix, ignores `Level`, builds a parallelogram from rectangular input; `Pathfinder` allocates a 2001×2001 matrix per call; `Neighbors()` allocates; occupancy snapshot rebuilt per call.
 - `MoveCharacterHandler` checks `MaxRange` only for the preferred path, not for the A* path; it emits an error on an empty path but doesn't return.
-- `ChallengeRatingModifier` adds the challenge rating (higher = easier) — sign to be checked against DSA5.
 - System.Reactive dependency to be removed (ADR-018); the post-build copy step does not copy all of Yarn Spinner's dependencies and doesn't check for conflicts with Unity's own assemblies.
 - `Entity.States` and components are keyed by `Type`; they must be keyed by stable name (ADR-021).
 

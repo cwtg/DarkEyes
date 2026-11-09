@@ -51,3 +51,8 @@ Agreed with the user before starting story 01.
 - Stream IDs live in one catalog (`Randomness/RandomStreamIds`).
 - Stream state (master seed, streams, PCG32) is internal to the backend: whoever can read it can predict rolls. Game code, the rule module and AIs draw only through `IRandomSource`. The seed derivation is pinned by a golden test, since changing it would change every new game and every stream derived later from old saves.
 - **No default seed:** a new game must set the master seed (entropy comes from outside the backend: clock and `Guid` are banned in logic); rolling without one throws, so a forgotten seed can't ship identical dice in every game. Test scenarios default to seed 0.
+
+## 2026-11-09: Generic outcome event for actions
+
+- Action handlers return an `ActResult` (reject, succeeded, failed, not possible with reason) instead of emitting their outcome; the `Chain` turns it into the last event of the commit, `ActionCompleted(action, outcome)`. No act needs an outcome event class of its own, and none can forget it, because the signature forces it (architecture §8.2: every dispatched action gets a response).
+- Events of state changes (`LockUnlocked`, `ContainerOpened`) stay and carry the patches; `ActionCompleted` tells how the act went.

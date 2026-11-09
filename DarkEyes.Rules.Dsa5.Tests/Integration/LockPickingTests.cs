@@ -75,12 +75,12 @@ public sealed class LockPickingTests
             .Build(seed: 1);
 
         // Act
-        DispatchResult result = game.Dispatch(new PickLockAction(Dsa5Scenario.Hero, Dsa5Scenario.Chest));
+        PickLockAction pick = new(Dsa5Scenario.Hero, Dsa5Scenario.Chest);
+        DispatchResult result = game.Dispatch(pick);
 
         // Assert: an outcome, not a rejection, and no SkillCheckRolled (no dice)
         CommitResult commit = Assert.IsType<Committed>(result).Commit;
-        LockPickNotPossible notPossible = Assert.IsType<LockPickNotPossible>(Assert.Single(commit.Steps).Event);
-        Assert.Equal(Dsa5Reasons.AttributeTooLow(AttributeId.Dexterity), notPossible.Reason);
+        Assert.Equal(new ActionCompleted(pick, ActOutcome.NotPossible(Dsa5Reasons.AttributeTooLow(AttributeId.Dexterity))), Assert.Single(commit.Steps).Event);
     }
 
     [Fact]
@@ -120,7 +120,7 @@ public sealed class LockPickingTests
     }
 
     [Fact]
-    public void Should_NotUnlock_When_TheCheckFails()
+    public void Should_ReportTheFailureAndKeepTheLock_When_TheCheckFails()
     {
         // Arrange: attributes 1 and rating 0 fail every roll except a critical success (not with this seed)
         GameStore game = new Dsa5Scenario()
@@ -129,11 +129,15 @@ public sealed class LockPickingTests
             .Build(seed: 1);
 
         // Act
-        CommitResult commit = Assert.IsType<Committed>(game.Dispatch(new PickLockAction(Dsa5Scenario.Hero, Dsa5Scenario.Chest))).Commit;
+        PickLockAction pick = new(Dsa5Scenario.Hero, Dsa5Scenario.Chest);
+        CommitResult commit = Assert.IsType<Committed>(game.Dispatch(pick)).Commit;
 
-        // Assert
-        SkillCheckRolled check = Assert.IsType<SkillCheckRolled>(Assert.Single(commit.Steps).Event);
+        // Assert: the roll (rule module), then the act's outcome; no LockUnlocked, so the lock stays locked
+        Assert.Equal(2, commit.Steps.Length);
+        SkillCheckRolled check = Assert.IsType<SkillCheckRolled>(commit.Steps[0].Event);
         Assert.False(check.Result is SkillCheckResult.Success or SkillCheckResult.CriticalSuccess or SkillCheckResult.SpectacularSuccess);
+        Assert.Equal(new ActionCompleted(pick, ActOutcome.Failed), commit.Steps[1].Event);
+        Assert.Empty(commit.Steps[1].Patches);
     }
 
     [Fact]

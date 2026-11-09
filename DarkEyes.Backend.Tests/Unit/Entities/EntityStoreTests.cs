@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using DarkEyes.Backend.Entities;
-using DarkEyes.Backend.Entities.State;
 using DarkEyes.Backend.Space;
 
 namespace DarkEyes.Backend.Tests.Unit.Entities;
@@ -45,20 +44,26 @@ public sealed class EntityStoreTests
         // Arrange
         EntityId id = new("id");
         EntityStore store = new();
-        Dictionary<Type, object> initialStates = new() { { typeof(LockedContainerState), new LockedContainerState("Chest", 1, [], true) } };
+        Dictionary<Type, object> initialStates = new() { { typeof(SampleState), new SampleState(Locked: true) } };
         store.Add(new(id, new(), new(), [], initialStates));
 
         // Act
         Entity retrievedBefore = store.Get(id);
-        retrievedBefore.States.TryGetValue(typeof(LockedContainerState), out object? stateBefore);
-        var before = stateBefore! as LockedContainerState;
+        retrievedBefore.States.TryGetValue(typeof(SampleState), out object? stateBefore);
+        var before = stateBefore! as SampleState;
         store.MutateEntity(id, (e) => e.WithState(before!.Unlock()));
         Entity retrievedAfter = store.Get(id);
-        retrievedAfter.States.TryGetValue(typeof(LockedContainerState), out object? stateAfter);
-        var after = stateAfter! as LockedContainerState;
+        retrievedAfter.States.TryGetValue(typeof(SampleState), out object? stateAfter);
+        var after = stateAfter! as SampleState;
 
         // Assert
         Assert.True(before!.Locked);
         Assert.False(after!.Locked);
     }
+}
+
+/// <summary>An example state for the old store (the state type it used before was deleted with the old chest code).</summary>
+file sealed record SampleState(bool Locked)
+{
+    public SampleState Unlock() => this with { Locked = false };
 }

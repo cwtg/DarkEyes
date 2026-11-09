@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Entities;
 using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Handlers;
@@ -45,7 +44,7 @@ public sealed class PathfindingTests
         NavigationMap map = new();
         map.Set(walkability, cost);
         store.ActiveLocation.NavigationMap = map;
-        GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, store, new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -99,7 +98,7 @@ public sealed class PathfindingTests
         NavigationMap map = new();
         map.Set(walkability, cost);
         store.ActiveLocation.NavigationMap = map;
-        GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, store, new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -144,7 +143,7 @@ public sealed class PathfindingTests
         NavigationMap map = new();
         map.Set(walkability, cost);
         store.ActiveLocation.NavigationMap = map;
-        GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, store, new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -189,7 +188,7 @@ public sealed class PathfindingTests
         NavigationMap map = new();
         map.Set(walkability, cost);
         store.ActiveLocation.NavigationMap = map;
-        GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, store, new NullLogger());
 
         List<GamePosition> preferredPath =
         [
@@ -253,7 +252,7 @@ public sealed class PathfindingTests
         NavigationMap map = new();
         map.Set(walkability, cost);
         store.ActiveLocation.NavigationMap = map;
-        GameOrchestrator orchestrator = new(router, store, (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, store, new NullLogger());
 
         List<GamePosition> preferredPath =
         [

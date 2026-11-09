@@ -60,10 +60,10 @@ public sealed class RejectionTests
 
     private sealed class CheckThenRejectHandler : IActionHandler<CheckThenRejectAction>
     {
-        public Reason? Handle(CheckThenRejectAction action, ActionContext context)
+        public ActResult Handle(CheckThenRejectAction action, ActionContext context)
         {
             context.Check(new CheckRequest(new CheckPurpose("test.check"), action.Actor, Target: null));
-            return Reason.Create("test.too_late");
+            return ActResult.Reject(Reason.Create("test.too_late"));
         }
     }
 
@@ -71,10 +71,10 @@ public sealed class RejectionTests
 
     private sealed class SubmitThenRejectHandler : IActionHandler<SubmitThenRejectAction>
     {
-        public Reason? Handle(SubmitThenRejectAction action, ActionContext context)
+        public ActResult Handle(SubmitThenRejectAction action, ActionContext context)
         {
             context.Submit(new OpenContainerEffect(action.Container, action.Actor));
-            return Reason.Create("test.too_late");
+            return ActResult.Reject(Reason.Create("test.too_late"));
         }
     }
 }

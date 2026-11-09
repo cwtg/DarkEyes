@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using DarkEyes.Backend.Core.Resolution;
 using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Handlers;
 using DarkEyes.Backend.Logging;
@@ -16,7 +15,7 @@ public sealed class DispatchAndHandlerTests
         // Arrange
         CommandRouter router = new();
         router.Register<TestCommand>((cmd, ctx) => ctx.Emit(new TestEvent()));
-        GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, new(), new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -34,7 +33,7 @@ public sealed class DispatchAndHandlerTests
     {
         // Arrange
         CommandRouter router = new();
-        GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, new(), new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);
@@ -53,7 +52,7 @@ public sealed class DispatchAndHandlerTests
         // Arrange
         CommandRouter router = new();
         router.Register<TestCommand>((cmd, ctx) => cmd.Dispatcher!.Dispatch(cmd));
-        GameOrchestrator orchestrator = new(router, new(), (new Random() as IRandomSource)!, new NullLogger());
+        GameOrchestrator orchestrator = new(router, new(), new NullLogger());
 
         List<IGameEvent> emittedEvents = [];
         using IDisposable subscription = orchestrator.Events.Subscribe(emittedEvents.Add);

@@ -6,7 +6,7 @@ namespace DarkEyes.Backend.Pipeline;
 /// <summary>Finds the handler for an action. Types are lookup keys only (no reflection).</summary>
 internal sealed class ActionRouter
 {
-    private readonly Dictionary<Type, Func<IAction, ActionContext, Reason?>> _handlers = [];
+    private readonly Dictionary<Type, Func<IAction, ActionContext, ActResult>> _handlers = [];
 
     public void Add<TAction>(IActionHandler<TAction> handler)
         where TAction : IAction
@@ -14,9 +14,9 @@ internal sealed class ActionRouter
         _handlers.Add(typeof(TAction), (action, context) => handler.Handle((TAction)action, context));
     }
 
-    public Reason? Handle(IAction action, ActionContext context)
+    public ActResult Handle(IAction action, ActionContext context)
     {
-        if (!_handlers.TryGetValue(action.GetType(), out Func<IAction, ActionContext, Reason?>? handler))
+        if (!_handlers.TryGetValue(action.GetType(), out Func<IAction, ActionContext, ActResult>? handler))
         {
             throw new InvalidOperationException($"No handler registered for action {action.GetType().Name}.");
         }

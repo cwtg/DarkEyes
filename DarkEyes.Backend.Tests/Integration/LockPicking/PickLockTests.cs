@@ -24,12 +24,16 @@ public sealed class PickLockTests
         var mirror = TestMirror.Connect(game);
 
         // Act
-        DispatchResult result = game.Dispatch(new PickLockAction(TestIds.Alrik, TestIds.CellarChest));
+        PickLockAction pick = new(TestIds.Alrik, TestIds.CellarChest);
+        DispatchResult result = game.Dispatch(pick);
 
         // Assert
         CommitResult commit = Assert.IsType<Committed>(result).Commit;
         mirror.Apply(commit);
-        Assert.Equal(new LockUnlocked(TestIds.CellarChest, TestIds.Alrik), Assert.Single(commit.Steps).Event);
+        Assert.Equal(2, commit.Steps.Length);
+        Assert.Equal(new LockUnlocked(TestIds.CellarChest, TestIds.Alrik), commit.Steps[0].Event);
+        Assert.Equal(new ActionCompleted(pick, ActOutcome.Succeeded), commit.Steps[1].Event);
+        Assert.Empty(commit.Steps[1].Patches);
         Assert.False(mirror.Get(TestIds.CellarChest, Lock.Key).IsLocked);
         Assert.False(mirror.Get(TestIds.CellarChest, ContainerState.Key).IsOpen);
         mirror.AssertMatches(game);
@@ -104,12 +108,13 @@ public sealed class PickLockTests
         var mirror = TestMirror.Connect(game);
 
         // Act
-        DispatchResult result = game.Dispatch(new PickLockAction(TestIds.Alrik, TestIds.CellarChest));
+        PickLockAction pick = new(TestIds.Alrik, TestIds.CellarChest);
+        DispatchResult result = game.Dispatch(pick);
 
         // Assert
         CommitResult commit = Assert.IsType<Committed>(result).Commit;
         mirror.Apply(commit);
-        Assert.Equal(new LockPickNotPossible(TestIds.Alrik, TestIds.CellarChest, ruleReason), Assert.Single(commit.Steps).Event);
+        Assert.Equal(new ActionCompleted(pick, ActOutcome.NotPossible(ruleReason)), Assert.Single(commit.Steps).Event);
         Assert.True(mirror.Get(TestIds.CellarChest, Lock.Key).IsLocked);
         mirror.AssertMatches(game);
     }

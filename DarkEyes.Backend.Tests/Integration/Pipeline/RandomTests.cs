@@ -149,7 +149,7 @@ public sealed class RandomTests
 
     private sealed class RollThenFailHandler : IActionHandler<RollThenFailAction>
     {
-        public Reason? Handle(RollThenFailAction action, ActionContext context)
+        public ActResult Handle(RollThenFailAction action, ActionContext context)
         {
             context.Check(new CheckRequest(CheckPurposes.PickLock, action.Actor, Target: null));
             throw new InvalidOperationException("A bug after the roll: the chain is discarded.");
