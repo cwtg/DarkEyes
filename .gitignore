@@ -107,8 +107,6 @@ DarkEyes.Unity/[Aa]ssets/Unity.VisualScripting.Generated/VisualScripting.Core/Pr
 # Auto-generated scenes by play mode tests
 DarkEyes.Unity/[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
-DarkEyes.Backend/bin/
-DarkEyes.Backend/obj/
-
-DarkEyes.Backend.Tests/bin/
-DarkEyes.Backend.Tests/obj/
+# .NET build output of every project in DarkEyes.sln (each project sits in a top-level DarkEyes.* folder)
+/DarkEyes.*/[Bb]in/
+/DarkEyes.*/[Oo]bj/

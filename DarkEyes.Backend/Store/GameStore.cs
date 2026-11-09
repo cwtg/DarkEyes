@@ -1,4 +1,4 @@
-#pragma warning disable CA1822 // Legacy code, replaced or moved to the rule module in story 01 (docs/implementation/01-open-chest.md).
+#pragma warning disable CA1822, S2325 // Legacy code from before the architecture; replaced when its use case is ported (architecture §11.2).
 
 using DarkEyes.Backend.Entities.State;
 using DarkEyes.Backend.Inventory;

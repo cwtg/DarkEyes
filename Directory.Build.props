@@ -24,6 +24,11 @@
     <NoWarn>$(NoWarn);CA1707</NoWarn>
   </PropertyGroup>
 
+  <!-- All projects: Sonar rules (the same ones SonarLint shows in the IDE), enforced in the build. -->
+  <ItemGroup>
+    <PackageReference Include="SonarAnalyzer.CSharp" PrivateAssets="all" />
+  </ItemGroup>
+
   <!-- Game code only: banned non-deterministic and culture-sensitive APIs (see BannedSymbols.txt). -->
   <ItemGroup Condition="'$(IsDarkEyesTestProject)' != 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />

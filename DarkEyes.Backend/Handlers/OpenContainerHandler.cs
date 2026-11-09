@@ -1,4 +1,4 @@
-#pragma warning disable CS8602 // Legacy code, replaced or moved to the rule module in story 01 (docs/implementation/01-open-chest.md).
+#pragma warning disable CS8602, S8969 // Legacy code, replaced or moved to the rule module in story 01 (docs/implementation/01-open-chest.md).
 
 using System.Collections.Generic;
 using DarkEyes.Backend.Core.Modifiers;

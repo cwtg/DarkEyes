@@ -1,3 +1,5 @@
+#pragma warning disable S1481 // Legacy code from before the architecture; replaced when its use case is ported (architecture §11.2).
+
 using System;
 using System.Collections.Generic;
 using DarkEyes.Backend.Core.Resolution;

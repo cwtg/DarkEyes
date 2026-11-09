@@ -16,7 +16,7 @@ internal sealed class Transaction(GameState state, Projection sent)
 
     public Projection Sent { get; private set; } = sent;
 
-    public void Apply(Op op)
+    public void Apply(IOp op)
     {
         switch (op)
         {

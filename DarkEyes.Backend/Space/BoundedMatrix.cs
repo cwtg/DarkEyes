@@ -1,3 +1,5 @@
+#pragma warning disable S4487 // Legacy code from before the architecture; replaced when its use case is ported (architecture §11.2).
+
 namespace DarkEyes.Backend.Space;
 
 internal class BoundedMatrix<T>

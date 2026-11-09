@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using DarkEyes.Backend.State;
 
 namespace DarkEyes.Backend.Visibility;
@@ -63,12 +64,9 @@ public sealed class Projection
             }
         }
 
-        foreach (string name in before.Keys)
+        if (before.Keys.Any(name => !after.ContainsKey(name)))
         {
-            if (!after.ContainsKey(name))
-            {
-                throw new NotSupportedException("Removing a component from a visible entity is not supported yet.");
-            }
+            throw new NotSupportedException("Removing a component from a visible entity is not supported yet.");
         }
     }
 }
