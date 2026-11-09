@@ -1,5 +1,6 @@
 using System;
 using DarkEyes.Backend.Containers;
+using DarkEyes.Backend.Locks;
 using DarkEyes.Backend.Pipeline;
 using DarkEyes.Backend.Space;
 using DarkEyes.Backend.State;
@@ -17,11 +18,12 @@ internal sealed class ScenarioBuilder
             .With(Placement.Key, new Placement(at)));
     }
 
-    public ScenarioBuilder WithChest(EntityId id, GamePosition at, bool isOpen = false)
+    public ScenarioBuilder WithChest(EntityId id, GamePosition at, bool isOpen = false, bool isLocked = false)
     {
-        return Add(Entity.Create(id)
+        Entity chest = Entity.Create(id)
             .With(Placement.Key, new Placement(at))
-            .With(ContainerState.Key, new ContainerState(isOpen)));
+            .With(ContainerState.Key, new ContainerState(isOpen));
+        return Add(isLocked ? chest.With(Lock.Key, new Lock(IsLocked: true)) : chest);
     }
 
     public GameStore Build() => new GameStoreBuilder().AddContainers().Build(_state);

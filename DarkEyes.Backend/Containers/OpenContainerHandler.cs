@@ -1,4 +1,5 @@
 using System;
+using DarkEyes.Backend.Locks;
 using DarkEyes.Backend.Pipeline;
 using DarkEyes.Backend.Space;
 using DarkEyes.Backend.State;
@@ -30,6 +31,12 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
         if (distance > MaxDistance)
         {
             return ContainerRejections.TooFarAway(distance, MaxDistance);
+        }
+
+        // After the range check: from afar, a rejection must not reveal whether something is locked.
+        if (container.Has(Lock.Key) && container.Get(Lock.Key).IsLocked)
+        {
+            return ContainerRejections.Locked();
         }
 
         context.Submit(new OpenContainerEffect(action.Container, action.Actor));

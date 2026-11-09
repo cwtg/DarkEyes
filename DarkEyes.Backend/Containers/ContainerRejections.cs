@@ -9,6 +9,8 @@ public static class ContainerRejections
 
     public const string AlreadyOpenCode = "container.already_open";
 
+    public const string LockedCode = "container.locked";
+
     public const string DistanceArgument = "distance";
 
     public const string MaxArgument = "max";
@@ -17,4 +19,6 @@ public static class ContainerRejections
         Rejection.Create(TooFarAwayCode, (DistanceArgument, distance), (MaxArgument, maxDistance));
 
     public static Rejection AlreadyOpen() => Rejection.Create(AlreadyOpenCode);
+
+    public static Rejection Locked() => Rejection.Create(LockedCode);
 }
