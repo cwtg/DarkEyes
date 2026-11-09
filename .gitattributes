@@ -6,6 +6,14 @@
 # This template is maintained from the gitattributes/gitattributes repository
 # and distributed under MIT License.
 
+# Normalize all text files to LF in the repository, independent of each machine's core.autocrlf;
+# the working tree gets the platform's line endings (CRLF on Windows), except where eol=lf is set below.
+*                       text=auto
+
+# Files Unity writes itself keep LF, so Unity and the IDE don't fight over them
+DarkEyes.Unity/Packages/*.json          eol=lf
+DarkEyes.Unity/ProjectSettings/**       eol=lf
+
 # Define macros (only works in top-level gitattributes files)
 [attr]lfs               filter=lfs diff=lfs merge=lfs -text
 [attr]unity-json        eol=lf linguist-language=json

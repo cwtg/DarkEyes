@@ -5,15 +5,23 @@ root = true
 
 # Default settings
 [*]
+end_of_line = crlf
 insert_final_newline = true
 indent_style = space
 indent_size = 4
 trim_trailing_whitespace = true
 
+# Unity's serialized asset files keep LF (they are eol=lf in .gitattributes)
+[*.{asmdef,asmref,index,inputactions,shadergraph,shadersubgraph,anim,asset,brush,controller,flare,fontsettings,giparams,guiskin,lighting,mask,mat,meta,mixer,overrideController,playable,prefab,preset,renderTexture,scenetemplate,shadervariants,signal,spriteatlas,terrainlayer,unity,physicMaterial}]
+end_of_line = lf
+
+# Files Unity writes itself keep LF (see .gitattributes)
+[DarkEyes.Unity/{Packages,ProjectSettings}/**]
+end_of_line = lf
+
 # C# files
 [*.cs]
 charset = utf-8
-end_of_line = crlf
 
 # New line preferences
 csharp_new_line_before_open_brace = all
