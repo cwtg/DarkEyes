@@ -1,10 +1,9 @@
-namespace DarkEyes.Backend.Logging
+namespace DarkEyes.Backend.Logging;
+
+public enum LogLevel : byte
 {
-    public enum LogLevel : byte
-    {
-        Debug,
-        Info,
-        Warning,
-        Error
-    }
+    Debug,
+    Info,
+    Warning,
+    Error
 }

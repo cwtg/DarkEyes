@@ -1,12 +1,11 @@
-namespace DarkEyes.Backend.Core.Resolution
+namespace DarkEyes.Backend.Core.Resolution;
+
+public enum ResultType : byte
 {
-    public enum ResultType : byte
-    {
-        CriticalBlunder,
-        Blunder,
-        Failed,
-        Success,
-        CriticalSuccess,
-        SuperCriticalSuccess,
-    }
+    CriticalBlunder,
+    Blunder,
+    Failed,
+    Success,
+    CriticalSuccess,
+    SuperCriticalSuccess,
 }

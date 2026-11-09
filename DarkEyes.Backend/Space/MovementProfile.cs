@@ -1,7 +1,6 @@
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+public class MovementProfile
 {
-    public class MovementProfile
-    {
-        public int MaxRange { get; init; } = 10;
-    }
+    public int MaxRange { get; init; } = 10;
 }

@@ -1,13 +1,12 @@
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+public interface INavigationView
 {
-    public interface INavigationView
-    {
-        public bool IsWalkable(GamePosition position);
+    bool IsWalkable(GamePosition position);
 
-        public bool IsOccupied(GamePosition position);
+    bool IsOccupied(GamePosition position);
 
-        public int MovementCost(GamePosition position);
+    int MovementCost(GamePosition position);
 
-        public CellContext ContextAt(GamePosition position);
-    }
+    CellContext ContextAt(GamePosition position);
 }

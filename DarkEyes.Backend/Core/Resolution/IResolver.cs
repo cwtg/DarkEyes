@@ -1,7 +1,6 @@
-namespace DarkEyes.Backend.Core.Resolution
+namespace DarkEyes.Backend.Core.Resolution;
+
+public interface IResolver
 {
-    public interface IResolver
-    {
-        public ResolutionResult Resolve(ResolutionRequest request, IRandomSource random);
-    }
+    ResolutionResult Resolve(ResolutionRequest request, IRandomSource random);
 }

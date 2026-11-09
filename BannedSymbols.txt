@@ -1,0 +1,25 @@
+T:System.Random; Use IRandomSource (own PRNG, state-held streams) for determinism
+P:System.DateTime.Now; Use the game clock; wall-clock time breaks determinism
+P:System.DateTime.UtcNow; Use the game clock; wall-clock time breaks determinism
+P:System.DateTime.Today; Use the game clock; wall-clock time breaks determinism
+P:System.DateTimeOffset.Now; Use the game clock; wall-clock time breaks determinism
+P:System.DateTimeOffset.UtcNow; Use the game clock; wall-clock time breaks determinism
+P:System.Environment.TickCount; Use the game clock; wall-clock time breaks determinism
+P:System.Environment.TickCount64; Use the game clock; wall-clock time breaks determinism
+M:System.Guid.NewGuid; Use content IDs or the state's spawn counter
+M:System.Collections.Generic.List`1.Sort; Sort with a comparer and full tie-breaking
+M:System.Array.Sort``1(``0[]); Sort with a comparer and full tie-breaking
+M:System.Array.Sort(System.Array); Sort with a comparer and full tie-breaking
+M:System.String.Compare(System.String,System.String); Use string.CompareOrdinal or StringComparer.Ordinal
+M:System.String.CompareTo(System.String); Use string.CompareOrdinal or StringComparer.Ordinal
+M:System.String.CompareTo(System.Object); Use string.CompareOrdinal or StringComparer.Ordinal
+P:System.StringComparer.CurrentCulture; Use StringComparer.Ordinal
+P:System.StringComparer.CurrentCultureIgnoreCase; Use StringComparer.Ordinal
+P:System.StringComparer.InvariantCulture; Use StringComparer.Ordinal
+P:System.StringComparer.InvariantCultureIgnoreCase; Use StringComparer.Ordinal
+M:System.Linq.Enumerable.OrderBy``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1}); Pass a comparer (e.g. StringComparer.Ordinal, Comparer<int>.Default): default string ordering is culture-sensitive
+M:System.Linq.Enumerable.OrderByDescending``2(System.Collections.Generic.IEnumerable{``0},System.Func{``0,``1}); Pass a comparer (e.g. StringComparer.Ordinal, Comparer<int>.Default): default string ordering is culture-sensitive
+M:System.Linq.Enumerable.ThenBy``2(System.Linq.IOrderedEnumerable{``0},System.Func{``0,``1}); Pass a comparer (e.g. StringComparer.Ordinal, Comparer<int>.Default): default string ordering is culture-sensitive
+M:System.Linq.Enumerable.ThenByDescending``2(System.Linq.IOrderedEnumerable{``0},System.Func{``0,``1}); Pass a comparer (e.g. StringComparer.Ordinal, Comparer<int>.Default): default string ordering is culture-sensitive
+M:System.Collections.Immutable.ImmutableArray`1.Sort; Sort with a comparer and full tie-breaking
+M:System.Collections.Immutable.ImmutableList`1.Sort; Sort with a comparer and full tie-breaking

@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Story
+namespace DarkEyes.Backend.Story;
+
+public class StoryState
 {
-    public class StoryState
-    {
-    }
 }

@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+public class CellContext
 {
-    public class CellContext
-    {
-    }
 }

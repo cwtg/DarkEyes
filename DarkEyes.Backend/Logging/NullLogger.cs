@@ -1,9 +1,8 @@
-namespace DarkEyes.Backend.Logging
+namespace DarkEyes.Backend.Logging;
+
+public sealed class NullLogger : IGameLogger
 {
-    public sealed class NullLogger : IGameLogger
+    public void Log(LogLevel level, string message)
     {
-        public void Log(LogLevel level, string message)
-        {
-        }
     }
 }

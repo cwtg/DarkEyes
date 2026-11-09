@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Events
+namespace DarkEyes.Backend.Events;
+
+public interface IGameEvent
 {
-    public interface IGameEvent
-    {
-    }
 }

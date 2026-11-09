@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Handlers
+namespace DarkEyes.Backend.Handlers;
+
+public interface ICommand
 {
-    public interface ICommand
-    {
-    }
 }

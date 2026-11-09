@@ -1,38 +1,40 @@
 using System.Collections.Generic;
 
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+public class NavigationMap()
 {
-    public class NavigationMap()
+    private readonly BoundedMatrix<(bool, int)> _map = new(-1000, 1000, -1000, 1000);
+
+    public bool IsWalkable(GamePosition position)
     {
-        private readonly BoundedMatrix<(bool, int)> _map = new(-1000, 1000, -1000, 1000);
+        (bool walkable, int _) = _map.Get(position.Q, position.R);
+        return walkable;
+    }
 
-        public bool IsWalkable(GamePosition position)
-        {
-            (bool walkable, int _) = _map.Get(position.Q, position.R);
-            return walkable;
-        }
+    public int BaseMovementCost(GamePosition position)
+    {
+        (bool _, int movementCost) = _map.Get(position.Q, position.R);
+        return movementCost;
+    }
 
-        public int BaseMovementCost(GamePosition position)
+    public void Set(IReadOnlyList<IReadOnlyList<bool>> walkabilityMap, IReadOnlyList<IReadOnlyList<int>> movementCostMap)
+    {
+        if (walkabilityMap.Count == movementCostMap.Count)
         {
-            (bool _, int movementCost) = _map.Get(position.Q, position.R);
-            return movementCost;
-        }
-
-        public void Set(IReadOnlyList<IReadOnlyList<bool>> walkabilityMap, IReadOnlyList<IReadOnlyList<int>> movementCostMap)
-        {
-            if (walkabilityMap.Count == movementCostMap.Count)
+            for (int i = 0; i < walkabilityMap.Count; i++)
             {
-                for (int i = 0; i < walkabilityMap.Count; i++)
+                IReadOnlyList<bool> walkRow = walkabilityMap[i];
+                IReadOnlyList<int> costRow = movementCostMap[i];
+
+                if (walkRow.Count != costRow.Count)
                 {
-                    IReadOnlyList<bool> walkRow = walkabilityMap[i];
-                    IReadOnlyList<int> costRow = movementCostMap[i];
+                    return;
+                }
 
-                    if (walkRow.Count != costRow.Count) return;
-
-                    for (int j = 0; j < walkRow.Count; j++)
-                    {
-                        _map.Set(i, j, (walkRow[j], costRow[j]));
-                    }
+                for (int j = 0; j < walkRow.Count; j++)
+                {
+                    _map.Set(i, j, (walkRow[j], costRow[j]));
                 }
             }
         }

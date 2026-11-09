@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Time
+namespace DarkEyes.Backend.Time;
+
+public class GameTime
 {
-    public class GameTime
-    {
-    }
 }

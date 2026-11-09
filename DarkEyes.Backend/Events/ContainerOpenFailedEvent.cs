@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Events
+namespace DarkEyes.Backend.Events;
+
+public sealed class ContainerOpenFailedEvent : IGameEvent
 {
-    public sealed class ContainerOpenFailedEvent : IGameEvent
-    {
-    }
 }

@@ -1,9 +1,8 @@
-namespace DarkEyes.Backend.Core.Stats
-{
-    public interface IStat
-    {
-        public StatId Id { get; }
+namespace DarkEyes.Backend.Core.Stats;
 
-        public int Value { get; }
-    }
+public interface IStat
+{
+    StatId Id { get; }
+
+    int Value { get; }
 }

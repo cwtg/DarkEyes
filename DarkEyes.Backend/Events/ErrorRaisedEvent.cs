@@ -1,7 +1,6 @@
-namespace DarkEyes.Backend.Events
+namespace DarkEyes.Backend.Events;
+
+public sealed class ErrorRaisedEvent(string reason) : IGameEvent
 {
-    public sealed class ErrorRaisedEvent(string reason) : IGameEvent
-    {
-        public string Reason { get; } = reason;
-    }
+    public string Reason { get; } = reason;
 }

@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Inventory
+namespace DarkEyes.Backend.Inventory;
+
+public class InventoryPool
 {
-    public class InventoryPool
-    {
-    }
 }

@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Persistence
+namespace DarkEyes.Backend.Persistence;
+
+public class SaveDocument
 {
-    public class SaveDocument
-    {
-    }
 }

@@ -1,6 +1,5 @@
-namespace DarkEyes.Backend.Entities
+namespace DarkEyes.Backend.Entities;
+
+public class ComponentData()
 {
-    public class ComponentData()
-    {
-    }
 }

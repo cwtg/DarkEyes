@@ -1,7 +1,6 @@
-namespace DarkEyes.Backend.Logging
+namespace DarkEyes.Backend.Logging;
+
+public interface IGameLogger
 {
-    public interface IGameLogger
-    {
-        public void Log(LogLevel level, string message);
-    }
+    void Log(LogLevel level, string message);
 }

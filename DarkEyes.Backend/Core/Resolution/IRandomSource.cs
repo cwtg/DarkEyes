@@ -1,11 +1,10 @@
-namespace DarkEyes.Backend.Core.Resolution
+namespace DarkEyes.Backend.Core.Resolution;
+
+public interface IRandomSource
 {
-    public interface IRandomSource
-    {
-        public int Next();
+    int Next();
 
-        public int Next(int max);
+    int Next(int max);
 
-        public int Next(int min, int max);
-    }
+    int Next(int min, int max);
 }

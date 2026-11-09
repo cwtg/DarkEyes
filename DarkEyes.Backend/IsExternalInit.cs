@@ -1,7 +1,6 @@
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("DarkEyes.Backend.Tests")]
-namespace System.Runtime.CompilerServices
+namespace System.Runtime.CompilerServices;
+
+internal static class IsExternalInit
 {
-    internal static class IsExternalInit
-    {
-    }
 }

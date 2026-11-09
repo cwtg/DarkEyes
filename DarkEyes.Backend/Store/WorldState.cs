@@ -1,9 +1,8 @@
 using DarkEyes.Backend.Entities.State;
 
-namespace DarkEyes.Backend.Store
+namespace DarkEyes.Backend.Store;
+
+public class WorldState
 {
-    public class WorldState
-    {
-        public LocationState CurrentArea { get; private set; } = new();
-    }
+    public LocationState CurrentArea { get; private set; } = new();
 }

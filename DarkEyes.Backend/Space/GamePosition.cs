@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+public record struct GamePosition(int Q, int R, int Level)
 {
-    public record struct GamePosition(int Q, int R, int Level)
+    public readonly IReadOnlyList<GamePosition> Neighbors()
     {
-        public readonly IReadOnlyList<GamePosition> Neighbors()
-    {
-        ReadOnlySpan<(int dQ, int dR)> hexDirections =[
+        ReadOnlySpan<(int dQ, int dR)> hexDirections = [
         (1, 0), (1, -1), (0, -1),
-        (-1, 0), (-1, 1), (0, 1)
+    (-1, 0), (-1, 1), (0, 1)
         ];
 
         List<GamePosition> neighbors = [];
@@ -28,5 +28,4 @@ namespace DarkEyes.Backend.Space
         int ds = -(dq + dr);
         return Math.Max(Math.Abs(dq), Math.Max(Math.Abs(dr), Math.Abs(ds)));
     }
-}
 }

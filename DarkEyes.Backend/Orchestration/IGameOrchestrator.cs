@@ -2,12 +2,11 @@ using System;
 using DarkEyes.Backend.Events;
 using DarkEyes.Backend.Handlers;
 
-namespace DarkEyes.Backend.Orchestration
-{
-    public interface IGameOrchestrator
-    {
-        public void Dispatch(ICommand command);
+namespace DarkEyes.Backend.Orchestration;
 
-        public IObservable<IGameEvent> Events { get; }
-    }
+public interface IGameOrchestrator
+{
+    void Dispatch(ICommand command);
+
+    IObservable<IGameEvent> Events { get; }
 }

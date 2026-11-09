@@ -6,14 +6,29 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <!-- Needed for IDE0005 (unnecessary usings) to be reported in the build; missing XML docs are not an error. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
     <IsDarkEyesTestProject Condition="$(MSBuildProjectName.EndsWith('.Tests'))">true</IsDarkEyesTestProject>
   </PropertyGroup>
 
+  <!-- Test names follow Should_<Outcome>_When_<Condition>, so underscores in member names are fine there. -->
+  <PropertyGroup Condition="'$(IsDarkEyesTestProject)' == 'true'">
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+  <!-- Game code only: banned non-deterministic and culture-sensitive APIs (see BannedSymbols.txt). -->
   <ItemGroup Condition="'$(IsDarkEyesTestProject)' != 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
   </ItemGroup>
 
 </Project>

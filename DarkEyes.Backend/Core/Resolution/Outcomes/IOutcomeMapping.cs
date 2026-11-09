@@ -1,7 +1,6 @@
-namespace DarkEyes.Backend.Core.Resolution.Outcomes
+namespace DarkEyes.Backend.Core.Resolution.Outcomes;
+
+public interface IOutcomeMapping<out TOutcome>
 {
-    public interface IOutcomeMapping<out TOutcome>
-    {
-        public TOutcome Map(in ResolutionResult result);
-    }
+    TOutcome Map(in ResolutionResult result);
 }

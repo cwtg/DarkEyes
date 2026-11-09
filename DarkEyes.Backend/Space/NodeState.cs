@@ -1,9 +1,8 @@
-namespace DarkEyes.Backend.Space
+namespace DarkEyes.Backend.Space;
+
+internal enum NodeState : byte
 {
-    internal enum NodeState : byte
-    {
-        Unvisited = 0,
-        Open = 1,
-        Closed = 2,
-    }
+    Unvisited = 0,
+    Open = 1,
+    Closed = 2,
 }
