@@ -190,35 +190,7 @@ Each AI module registers one or more **controllers**. A controller is a determin
 
 ## 6. Runtime View
 
-### 6.1 Player action: open a locked chest
-
-```mermaid
-sequenceDiagram
-    participant U as Unity
-    participant D as Dispatcher
-    participant P as Preconditions
-    participant A as Action handler (backend gameplay)
-    participant R as Unlock rule (rule module)
-    participant F as Effect handlers
-    participant S as State
-    U->>D: Dispatch(OpenContainer(actor, chest))
-    D->>P: layer/mode, turn, able to act, costs
-    P-->>D: ok
-    D->>A: handle (transaction view, RNG from state)
-    A->>A: validate (range, open/locked)
-    A->>R: try to unlock (actor, lock)
-    R->>R: lock-picking check (3d20)
-    R-->>A: outcome + CheckRolled
-    A->>F: effects: Unlock(chest), events: CheckRolled, ContainerUnlocked
-    F->>F: enforce invariants → ops
-    D->>S: apply ops atomically → new state
-    D->>D: per step: diff Project(before) vs Project(after) → patches; events via observer view
-    D-->>U: CommitResult [ (CheckRolled, []), (ContainerUnlocked, [chest.Lock]) ]
-```
-
-If validation fails, the result is a **rejection** (reason code + arguments, e.g. `container.too_far_away(distance: 3, max: 1)`) and the state is unchanged.
-
-### 6.2 Reaction chain with a pending player decision
+### 6.1 Reaction chain with a pending player decision
 
 1. The player moves a hero past an enemy (one action).
 2. A reaction rule detects a free attack (*Passierschlag*), queued **within the same run**. The attack roll hits.
@@ -229,24 +201,24 @@ If validation fails, the result is a **rejection** (reason code + arguments, e.g
 
 While a chain is pending nothing else runs (no time advance, AI or scheduler). Saving stores the committed state plus `PendingResolution`; loading re-runs the chain. The reaction queue has a depth limit; re-entrant dispatch is forbidden.
 
-### 6.3 Time advancing in exploration
+### 6.2 Time advancing in exploration
 
 1. Unity calls `AdvanceRealTime(ms)` from its frame loop.
 2. The backend converts it to game time using the time scale in the state (0 if paused or in rounds).
 3. The scheduler jumps from due entry to due entry (effect ends, activity completes, a mover enters its next cell, story trigger, AI re-evaluation), each processed as a system-origin commit through the effect layer. Entries due at the same time are ordered by the rules, then by the stable fallback (priority → sequence number → ID). There is no fine stepping.
 4. A cell entry lets rules react (perception, traps). A trigger that needs the player (enemy noticed, encounter, ambush) stops movement and switches the time mode (e.g. into rounds); the frontend switches from clock-driven to step-driven presentation.
 
-### 6.4 NPC turns in rounds
+### 6.3 NPC turns in rounds
 
 When an NPC's turn starts, the engine asks the NPC's AI controller for an action and dispatches it with origin `AI`. The backend computes every NPC turn **immediately** as consecutive commits until the next player decision. Unity queues and presents them at its own pace. The backend never waits for animations.
 
-### 6.5 Dialogue and story triggers
+### 6.4 Dialogue and story triggers
 
 - A game event (e.g. `ItemPickedUp(item.sacred_relic)`) matches a story trigger (*When* event pattern, optional *If*) → the Yarn node `Relic_Found` runs to completion inside the same chain, on a fresh VM. Silent nodes set variables and run commands (→ effects). If the chain is re-run (ADR-023), the node simply runs again on a new VM.
 - A dialogue node runs as a chain (ADR-029) **up to the next choice point**; all lines are events with line IDs + substitutions. The choice point is a `Decide`: the chain is pending, and steps so far are provisional. The answer is either a dialogue choice or one of the actions the rules allow during dialogue (like a combat turn, e.g. own equipment slots only). On each answer the node is re-run from its start on a fresh VM. Game time is stopped; nothing outside the dialogue runs.
 - At a `<<jump>>` to another node (with no active detour) and at the end of the dialogue, the chain **commits**. Between nodes the committed state holds `ActiveDialogue { Node }`, which is plain data. Example walkthrough: a quest-giver dialogue with a persuasion check, a fate-point reroll, a silent trigger node and a scheduled failure trigger all reduce to variables, triggers and effects in the state; the VM is never persisted.
 
-### 6.6 Load game
+### 6.5 Load game
 
 Unity reads the save text → the backend checks the format version (once formats are stable: migrates the JSON stepwise; before that, rejects old versions) → deserializes into a new state → re-runs a `PendingResolution` if present → sends the frontend the full projection as patches (a diff against an empty projection).
 
@@ -280,6 +252,7 @@ flowchart LR
 
 ### 8.2 Change pipeline and authority
 - **Actions** (player, AI): attempts by an actor; rule-checked.
+- **An action is one act of one actor (or the party as a group) as the rules define it.** The backend executes exactly what was dispatched and never adds acts the actor didn't choose. An act's execution may span many steps or game time (movement steps cell by cell, ongoing activities); that is one act, not a chain. Consequences the rules impose are effects or triggers; optional responses are `Decide` for the responding actor. What counts as one act is decided by the rules, not by convenience. Composing acts (convenience, automation, standing orders, auto-answers) is the caller's job: the frontend or an AI controller sends ordinary actions, each validated and committed on its own. Composed plans are planning state: not atomic, not saved; replays stay exact because the input log holds the individual actions.
 - **Effects** (scheduler, story, reactions, debug, and action outcomes): decreed domain changes that enforce invariants.
 - **Ops**: record-level writes (`SetComponent`, `AddEntity`, …).
 - Authority is enforced by **entry points**: the public dispatcher accepts only actions; effects can only be submitted through the handler context.

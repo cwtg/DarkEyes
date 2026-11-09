@@ -19,6 +19,7 @@ Build/test: `dotnet build DarkEyes.sln`, `dotnet test DarkEyes.sln`.
 
 **Ownership and flow**
 - The backend owns all state and rules; Unity presents, collects input and sends **actions**. No game logic in Unity.
+- **An action is one act as the rules define it**; the backend never adds acts the actor didn't choose. Its execution may span steps or time (movement cell by cell) and stays one act. Composition (walk-then-open, automation, auto-answers) is the frontend's or AI controller's job, with ordinary actions validated one by one.
 - One **immutable state tree** (records + `System.Collections.Immutable`, no mutable members). Commits are final; no undo.
 - Pipeline: **actions** (actors, rule-checked) → **effects** (decreed, invariant-enforcing) → **ops** (record-level writes). Player and AI enter at actions; scheduler, story, reactions and debug at effects. Authority is enforced by entry points. Shared preconditions are declared at registration.
 - Handlers work on a transaction view; the transaction is applied atomically or discarded. Reactions run in a queue within the same run (depth limit); re-entrant dispatch is forbidden.
