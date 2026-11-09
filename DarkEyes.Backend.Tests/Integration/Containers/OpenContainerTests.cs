@@ -25,5 +25,6 @@ public sealed class OpenContainerTests
         mirror.Apply(commit);
         Assert.IsType<ContainerOpened>(Assert.Single(commit.Steps).Event);
         Assert.True(mirror.Get(TestIds.CellarChest, ContainerState.Key).IsOpen);
+        mirror.AssertMatches(game);
     }
 }

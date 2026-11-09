@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using DarkEyes.Backend.Pipeline;
 using DarkEyes.Backend.State;
 using DarkEyes.Backend.Visibility;
@@ -34,6 +36,23 @@ internal sealed class TestMirror
         where T : class
     {
         return (T)_entities[id][key.Name];
+    }
+
+    /// <summary>The sync invariant: after applying all patches, the mirror equals the projection of the store's current state.</summary>
+    public void AssertMatches(GameStore store)
+    {
+        var expected = Projection.Of(store.State);
+
+        Assert.Equal(expected.Entities.Keys, _entities.Keys.OrderBy(id => id, EntityId.Ordinal));
+        foreach (KeyValuePair<EntityId, ImmutableSortedDictionary<string, object>> entity in expected.Entities)
+        {
+            Dictionary<string, object> actual = _entities[entity.Key];
+            Assert.Equal(entity.Value.Keys, actual.Keys.OrderBy(name => name, StringComparer.Ordinal));
+            foreach (KeyValuePair<string, object> component in entity.Value)
+            {
+                Assert.Equal(component.Value, actual[component.Key]);
+            }
+        }
     }
 
     private void Apply(IEnumerable<Patch> patches)

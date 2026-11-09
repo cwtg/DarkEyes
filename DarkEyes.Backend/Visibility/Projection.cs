@@ -17,6 +17,9 @@ public sealed class Projection
 
     public ImmutableSortedDictionary<EntityId, ImmutableSortedDictionary<string, object>> Entities { get; }
 
+    /// <summary>The full projection of a state.</summary>
+    internal static Projection Of(GameState state) => Update(Empty, state, state.Entities.Keys).Projection;
+
     /// <summary>Re-projects the given entities and diffs them against the last projection sent.</summary>
     internal static (Projection Projection, ImmutableArray<Patch> Patches) Update(Projection sent, GameState state, IEnumerable<EntityId> dirty)
     {
