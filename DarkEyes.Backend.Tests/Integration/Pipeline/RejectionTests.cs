@@ -50,7 +50,7 @@ public sealed class RejectionTests
     public void Should_Throw_When_ARejectionArgumentIsNotASimpleValue()
     {
         // Act
-        static void Act() => Rejection.Create("test.float_argument", ("distance", 1.5));
+        static void Act() => Reason.Create("test.float_argument", ("distance", 1.5));
 
         // Assert
         Assert.Throws<ArgumentException>(Act);
@@ -60,10 +60,10 @@ public sealed class RejectionTests
 
     private sealed class CheckThenRejectHandler : IActionHandler<CheckThenRejectAction>
     {
-        public Rejection? Handle(CheckThenRejectAction action, ActionContext context)
+        public Reason? Handle(CheckThenRejectAction action, ActionContext context)
         {
             context.Check(new CheckRequest(new CheckPurpose("test.check"), action.Actor, Target: null));
-            return Rejection.Create("test.too_late");
+            return Reason.Create("test.too_late");
         }
     }
 
@@ -71,10 +71,10 @@ public sealed class RejectionTests
 
     private sealed class SubmitThenRejectHandler : IActionHandler<SubmitThenRejectAction>
     {
-        public Rejection? Handle(SubmitThenRejectAction action, ActionContext context)
+        public Reason? Handle(SubmitThenRejectAction action, ActionContext context)
         {
             context.Submit(new OpenContainerEffect(action.Container, action.Actor));
-            return Rejection.Create("test.too_late");
+            return Reason.Create("test.too_late");
         }
     }
 }

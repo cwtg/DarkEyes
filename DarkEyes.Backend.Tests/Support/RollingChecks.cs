@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using DarkEyes.Backend.Checks;
+using DarkEyes.Backend.State;
 
 namespace DarkEyes.Backend.Tests.Support;
 
@@ -11,6 +12,8 @@ internal sealed class RollingChecks(int rollsPerCheck = 1) : IChecks
 
     public IReadOnlyList<int> Rolls => _rolls;
 
+    public CheckAssessment Assess(CheckRequest request, GameState state) => CheckAssessment.Possible;
+
     public CheckResult Roll(CheckRequest request, CheckContext context)
     {
         for (int i = 0; i < _rollsPerCheck; i++)
@@ -18,6 +21,6 @@ internal sealed class RollingChecks(int rollsPerCheck = 1) : IChecks
             _rolls.Add(context.Random.Next(1, 21));
         }
 
-        return new CheckResult(Succeeded: true, Degree: 1);
+        return new CheckSucceeded(degree: 1);
     }
 }

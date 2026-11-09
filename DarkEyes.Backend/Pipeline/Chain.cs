@@ -13,9 +13,9 @@ internal sealed class Chain(Transaction transaction, PipelineServices services)
     public Transaction Transaction => _transaction;
 
     /// <summary>Runs the root action. A rejection is pure validation: it is only valid before the first check, submitted effect or emitted event.</summary>
-    public Rejection? Run(IAction root)
+    public Reason? Run(IAction root)
     {
-        Rejection? rejection = _services.Actions.Handle(root, new ActionContext(this));
+        Reason? rejection = _services.Actions.Handle(root, new ActionContext(this));
         if (rejection is not null && _changed)
         {
             throw new InvalidOperationException($"{root.GetType().Name} was rejected ({rejection}) after it had already run a check, submitted effects or emitted events. Validate before changing anything.");
@@ -27,10 +27,11 @@ internal sealed class Chain(Transaction transaction, PipelineServices services)
     public CheckResult Check(CheckRequest request)
     {
         _changed = true;
-        IChecks checks = _services.Checks
-            ?? throw new InvalidOperationException($"A check ({request.Purpose}) was requested, but no check service is installed. The rule module installs it.");
-        return checks.Roll(request, new CheckContext(this));
+        return RequireChecks(request).Roll(request, new CheckContext(this));
     }
+
+    private IChecks RequireChecks(CheckRequest request) => _services.Checks
+        ?? throw new InvalidOperationException($"A check ({request.Purpose}) was requested, but no check service is installed. The rule module installs it.");
 
     public void Submit(IEffect effect)
     {

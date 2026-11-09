@@ -11,7 +11,7 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
     /// <summary>Opening needs the actor on a neighbouring hex.</summary>
     private const int MaxDistance = 1;
 
-    public Rejection? Handle(OpenContainerAction action, ActionContext context)
+    public Reason? Handle(OpenContainerAction action, ActionContext context)
     {
         Entity container = context.State.GetEntity(action.Container);
         if (!container.Has(ContainerState.Key))

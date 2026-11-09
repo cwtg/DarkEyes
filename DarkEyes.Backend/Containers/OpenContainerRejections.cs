@@ -1,5 +1,3 @@
-using DarkEyes.Backend.Pipeline;
-
 namespace DarkEyes.Backend.Containers;
 
 /// <summary>The reasons why opening a container can be refused.</summary>
@@ -15,10 +13,10 @@ public static class OpenContainerRejections
 
     public const string MaxArgument = "max";
 
-    public static Rejection TooFarAway(int distance, int maxDistance) =>
-        Rejection.Create(TooFarAwayCode, (DistanceArgument, distance), (MaxArgument, maxDistance));
+    public static Reason TooFarAway(int distance, int maxDistance) =>
+        Reason.Create(TooFarAwayCode, (DistanceArgument, distance), (MaxArgument, maxDistance));
 
-    public static Rejection AlreadyOpen() => Rejection.Create(AlreadyOpenCode);
+    public static Reason AlreadyOpen() => Reason.Create(AlreadyOpenCode);
 
-    public static Rejection Locked() => Rejection.Create(LockedCode);
+    public static Reason Locked() => Reason.Create(LockedCode);
 }

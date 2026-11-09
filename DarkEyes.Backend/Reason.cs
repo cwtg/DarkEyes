@@ -4,16 +4,17 @@ using System.Collections.Immutable;
 using System.Linq;
 using DarkEyes.Backend.State;
 
-namespace DarkEyes.Backend.Pipeline;
+namespace DarkEyes.Backend;
 
 /// <summary>
-/// Why an action was refused: a stable, act-namespaced reason code plus named arguments.
-/// Acts create rejections only through their own factories, which keep code and arguments consistent.
-/// Arguments are restricted to simple, deterministic values: <see cref="int"/>, <see cref="bool"/>, <see cref="string"/>, <see cref="EntityId"/>.
+/// A stable, namespaced reason code plus named arguments: why an action was rejected, or why a check is not possible.
+/// The frontend maps codes to texts. Reasons are created only through factories next to their act or rule, which keep
+/// code and arguments consistent. Arguments are simple, deterministic values: <see cref="int"/>, <see cref="bool"/>,
+/// <see cref="string"/>, <see cref="EntityId"/>.
 /// </summary>
-public sealed record Rejection
+public sealed record Reason
 {
-    private Rejection(string code, ImmutableSortedDictionary<string, object> arguments)
+    private Reason(string code, ImmutableSortedDictionary<string, object> arguments)
     {
         Code = code;
         Arguments = arguments;
@@ -23,11 +24,11 @@ public sealed record Rejection
 
     public ImmutableSortedDictionary<string, object> Arguments { get; }
 
-    public static Rejection Create(string code, params (string Name, object Value)[] arguments)
+    public static Reason Create(string code, params (string Name, object Value)[] arguments)
     {
         if (string.IsNullOrWhiteSpace(code))
         {
-            throw new ArgumentException("A rejection needs a code.", nameof(code));
+            throw new ArgumentException("A reason needs a code.", nameof(code));
         }
 
         ImmutableSortedDictionary<string, object>.Builder builder = ImmutableSortedDictionary.CreateBuilder<string, object>(StringComparer.Ordinal);
@@ -35,17 +36,17 @@ public sealed record Rejection
         {
             if (value is not (int or bool or string or EntityId))
             {
-                throw new ArgumentException($"Rejection argument '{name}' must be an int, bool, string or EntityId, not {value?.GetType().Name ?? "null"}.", nameof(arguments));
+                throw new ArgumentException($"Reason argument '{name}' must be an int, bool, string or EntityId, not {value?.GetType().Name ?? "null"}.", nameof(arguments));
             }
 
             builder.Add(name, value);
         }
 
-        return new Rejection(code, builder.ToImmutable());
+        return new Reason(code, builder.ToImmutable());
     }
 
     /// <summary>Value equality over code and arguments (a record alone would compare the argument map by reference).</summary>
-    public bool Equals(Rejection? other)
+    public bool Equals(Reason? other)
     {
         return other is not null
             && string.Equals(Code, other.Code, StringComparison.Ordinal)

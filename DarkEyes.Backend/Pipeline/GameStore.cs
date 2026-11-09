@@ -30,7 +30,7 @@ public sealed class GameStore
     public DispatchResult Dispatch(IAction action)
     {
         Transaction transaction = new(State, _sent);
-        Rejection? rejection = new Chain(transaction, _services).Run(action);
+        Reason? rejection = new Chain(transaction, _services).Run(action);
         if (rejection is not null)
         {
             return new Rejected(rejection);

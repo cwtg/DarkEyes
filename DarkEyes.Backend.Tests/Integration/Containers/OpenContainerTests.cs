@@ -45,7 +45,7 @@ public sealed class OpenContainerTests
         DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
 
         // Assert
-        Rejection rejection = Assert.IsType<Rejected>(result).Reason;
+        Reason rejection = Assert.IsType<Rejected>(result).Reason;
         Assert.Equal(OpenContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
@@ -66,7 +66,7 @@ public sealed class OpenContainerTests
         DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
 
         // Assert
-        Rejection rejection = Assert.IsType<Rejected>(result).Reason;
+        Reason rejection = Assert.IsType<Rejected>(result).Reason;
         Assert.Equal(OpenContainerRejections.AlreadyOpen(), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
@@ -87,7 +87,7 @@ public sealed class OpenContainerTests
         DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
 
         // Assert
-        Rejection rejection = Assert.IsType<Rejected>(result).Reason;
+        Reason rejection = Assert.IsType<Rejected>(result).Reason;
         Assert.Equal(OpenContainerRejections.Locked(), rejection);
         Assert.Same(before, game.State);
         mirror.AssertMatches(game);
@@ -106,7 +106,7 @@ public sealed class OpenContainerTests
         DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
 
         // Assert
-        Rejection rejection = Assert.IsType<Rejected>(result).Reason;
+        Reason rejection = Assert.IsType<Rejected>(result).Reason;
         Assert.Equal(OpenContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
     }
 

@@ -92,6 +92,48 @@ public sealed class PickLockTests
     }
 
     [Fact]
+    public void Should_ReportNotPossibleAndKeepTheLock_When_TheCheckCannotBeAttempted()
+    {
+        // Arrange: never a rejection, an outcome carrying the rule reason (ADR-010)
+        var ruleReason = Reason.Create("rules.too_hard");
+        GameStore game = new ScenarioBuilder()
+            .WithHero(TestIds.Alrik, at: new GamePosition(0, 0, 0))
+            .WithChest(TestIds.CellarChest, at: new GamePosition(1, 0, 0), chestLock: ChestLock.Locked)
+            .WithChecks(new ScriptedChecks(new CheckNotPossible(ruleReason)))
+            .Build();
+        var mirror = TestMirror.Connect(game);
+
+        // Act
+        DispatchResult result = game.Dispatch(new PickLockAction(TestIds.Alrik, TestIds.CellarChest));
+
+        // Assert
+        CommitResult commit = Assert.IsType<Committed>(result).Commit;
+        mirror.Apply(commit);
+        Assert.Equal(new LockPickNotPossible(TestIds.Alrik, TestIds.CellarChest, ruleReason), Assert.Single(commit.Steps).Event);
+        Assert.True(mirror.Get(TestIds.CellarChest, Lock.Key).IsLocked);
+        mirror.AssertMatches(game);
+    }
+
+    [Fact]
+    public void Should_KeepTheLock_When_TheCheckFails()
+    {
+        // Arrange
+        GameStore game = new ScenarioBuilder()
+            .WithHero(TestIds.Alrik, at: new GamePosition(0, 0, 0))
+            .WithChest(TestIds.CellarChest, at: new GamePosition(1, 0, 0), chestLock: ChestLock.Locked)
+            .WithChecks(new ScriptedChecks(succeed: false))
+            .Build();
+        var mirror = TestMirror.Connect(game);
+
+        // Act
+        mirror.Apply(Assert.IsType<Committed>(game.Dispatch(new PickLockAction(TestIds.Alrik, TestIds.CellarChest))).Commit);
+
+        // Assert
+        Assert.True(mirror.Get(TestIds.CellarChest, Lock.Key).IsLocked);
+        mirror.AssertMatches(game);
+    }
+
+    [Fact]
     public void Should_Throw_When_NoCheckServiceIsInstalled()
     {
         // Arrange

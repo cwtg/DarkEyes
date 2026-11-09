@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace DarkEyes.Backend.Checks;
 
 /// <summary>
@@ -7,4 +9,7 @@ namespace DarkEyes.Backend.Checks;
 public static class CheckPurposes
 {
     public static CheckPurpose PickLock { get; } = new("pick_lock");
+
+    /// <summary>Every purpose, for the rule module's completeness test. Add new purposes here too.</summary>
+    public static ImmutableArray<CheckPurpose> All { get; } = [PickLock];
 }

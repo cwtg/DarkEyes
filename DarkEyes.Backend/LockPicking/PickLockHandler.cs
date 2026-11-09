@@ -12,7 +12,7 @@ internal sealed class PickLockHandler : IActionHandler<PickLockAction>
     /// <summary>Picking a lock needs the actor on a neighbouring hex.</summary>
     private const int MaxDistance = 1;
 
-    public Rejection? Handle(PickLockAction action, ActionContext context)
+    public Reason? Handle(PickLockAction action, ActionContext context)
     {
         Entity target = context.State.GetEntity(action.Target);
         if (!target.Has(Lock.Key))
@@ -32,11 +32,10 @@ internal sealed class PickLockHandler : IActionHandler<PickLockAction>
             return PickLockRejections.NotLocked();
         }
 
-        CheckResult check = context.Check(new CheckRequest(CheckPurposes.PickLock, action.Actor, action.Target));
-        if (check.Succeeded)
-        {
-            context.Submit(new UnlockEffect(action.Target, action.Actor));
-        }
+        context.Check(new CheckRequest(CheckPurposes.PickLock, action.Actor, action.Target)).Match(
+            succeeded: _ => context.Submit(new UnlockEffect(action.Target, action.Actor)),
+            failed: () => { },
+            notPossible: reason => context.Emit(new LockPickNotPossible(action.Actor, action.Target, reason)));
 
         return null;
     }
