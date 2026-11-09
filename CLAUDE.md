@@ -87,6 +87,8 @@ The code predates the agreed architecture; architecture doc §11.2 lists the gap
 - No public fields; no access modifiers on interface members.
 - **Naming:** actions imperative with suffix (`OpenContainerAction`); events past tense without suffix (`ContainerOpened`); rejections as nouns (`TooFarAway`); content IDs lowercase, dot-separated (`hero.alrik`, `skill.lockpicking`), referenced through constants, never inline strings.
 - **Feature folders** for new code (e.g. `Containers/` holds the action, handler, event and components), not folders per technical kind.
+- Every code folder has a short `README.md`: a quick, high-level overview of the intent behind each group of files, in a few bullets. Not a file list and not a change log (no status, history or plans). Update it when the concepts in the folder change. Test folders that only mirror a backend folder need none.
+- **One type per file**, named after the type (`ComponentKey{T}.cs` for generics). Exception: a closed hierarchy of small records (an abstract base and its cases) may share one file named after the base.
 - Tests: xUnit, `Should_<Outcome>_When_<Condition>`, `// Arrange / // Act / // Assert`. Prefer **TDD**; test intent through the public API (integration tests via dispatch) over implementation details. Rule tests use a **scripted random source** (fixed rolls); real seeds only for determinism and golden tests.
 - English for code, comments, docs and commit messages.
 

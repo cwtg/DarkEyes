@@ -63,13 +63,20 @@ When step 5 is green, delete `OpenContainerHandler`, `OpenContainerCommand`, the
 
 Projection diffing beyond what the tests need; scheduler and time; movement and pathfinding; perception and knowledge; Yarn; persistence; AI; Unity code. Don't build ahead for them, but don't contradict the architecture either.
 
+## Decisions made during implementation
+
+- **Public API (step 1):** `GameStore` (built by `GameStoreBuilder`, gameplay registered via extension methods such as `AddContainers()`); `Dispatch(IAction)` is the player entry point and returns `DispatchResult` = `Committed(CommitResult)` (`Rejected` follows in step 2); `CommitResult.Steps` are `Step(Event, Patches)`; `Connect()` returns the full projection as patches. No `IObservable` push yet.
+- **Pipeline (step 1):** actions and effects are different kinds and have separate routers (`ActionRouter`, `EffectRouter`), which are pure, independent lookups. A per-dispatch `Chain` (the architecture's term for a root and everything that follows from it) holds the transaction and both routers and runs the root; `ActionContext.Submit` goes through it. Per-run behaviour belongs to the chain: later the reaction queue and depth limit, roots other than actions (scheduler entry, trigger firing) and replay. Preconditions and rejections attach to action handling. Action handlers get an `ActionContext` (read, submit effects, emit events) and cannot write; effect handlers get an `EffectContext` (read, write ops, emit events). The `Transaction` is only the working copy. `Emit` closes a step: the event plus the patches of the ops since the previous event. Ops after the last event are a bug and throw.
+- **State encapsulation (step 1, from review):** `Entity` and `GameState` are non-positional records with private constructors and private `init`, so outside code can't use `with` or pass its own maps; factories and `With` are the only way in, which keeps the ordinal comparers and the key type check. `Entity.Components` is internal. `GameStore.State` is internal (the frontend only sees projections); tests reach it via `InternalsVisibleTo`. `Patch` is closed (`private protected`). A `GameStoreBuilder` builds exactly one store.
+- **Test support (step 1):** `ScenarioBuilder`, `TestMirror` and `TestIds` live in `DarkEyes.Backend.Tests/Support/`. Whether they move into a shared library is decided in step 4.
+- **Component access:** by key object, see `decisions.md`.
+
 ## Decisions the implementing session should raise with the user (not decided yet)
 
-- Concrete public API shape: the dispatcher entry point, the commit result type, the rejection type; from step 4, how the rule module registers its unlock implementation and how `ScenarioBuilder` gets it.
+- The rejection type (step 2); from step 4, how the rule module registers its unlock implementation and how `ScenarioBuilder` gets it.
 - Where rule-module tests live (from step 4): the existing test project referencing both assemblies, or a separate `DarkEyes.Rules.Dsa5.Tests`.
 - Which PRNG (PCG32 or xoshiro128\*\*) and how streams are derived from the master seed.
 - How "adjacent" is measured before footprints exist (hex distance between positions is the obvious interim; footprints come with movement).
-- Where `ScenarioBuilder` and the test mirror live (test project vs. a shared test-support library).
 
 ## Working rules (from the user)
 
@@ -77,3 +84,12 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 - Commit only after the user agrees, or when committing is part of the task.
 - Flag bugs, inconsistencies and DSA5 deviations you notice.
 - The architecture doc holds only architecture. Implementation status, plans and branches don't go there.
+
+## Status
+
+- **2026-11-09:** step 1 is green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: range check (step 2), rejections, observer-view policies for events, component visibility policies, the sync-invariant check (mirror == projection of the final state). The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); step 4 may need "component added" for lock state.
+- **Deferred from the review of step 1:**
+  - **Unity dependencies:** `System.Collections.Immutable` 10.0.11 pulls in `System.Memory` 4.6.3 and `System.Runtime.CompilerServices.Unsafe` 6.1.2; only Immutable is copied to `Assets/Plugins`. Check in the Unity editor (dependency spike, at the latest with the walking skeleton): copy the dependencies or pick versions matching what Unity ships.
+  - **Value equality of collections in records** (`Step.Patches`, `CommitResult.Steps`, `EntityAppeared.Components`, entity maps): decide when replay checks, golden tests or the mirror == projection comparison need it.
+  - **Re-entrancy guard** on `GameStore.Dispatch`: add together with the `IObservable` push (the first way to re-enter), with a test.
+- Next: step 2.

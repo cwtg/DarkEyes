@@ -30,3 +30,9 @@ Agreed with the user before starting story 01.
 - Turned off: CA1716 (keywords of other .NET languages, irrelevant here); CA1707 in test projects (test names use underscores).
 - **Legacy code** that a story replaces gets a file-level `#pragma warning disable <ids> // Legacy ...` that points to the story. These go away with the old code. New code gets no exemptions.
 - CI runs on `windows-latest` to match the development machine (CRLF line endings under enforced formatting).
+
+## 2026-11-09: Component access by key object
+
+- Each component type declares its stable name once, as a static key: `ContainerState.Key = new ComponentKey<ContainerState>("container")`. Access goes through the key (`entity.Get(ContainerState.Key)`); there is no type-to-name registry.
+- **Why:** type and name can't drift apart, no runtime lookup can fail for an unregistered type, and the key is the natural place for the codec and visibility policy later.
+- A key is a value (name + type), not bound 1:1 to a type: it can be defined outside the type, and one type can have several keys (e.g. tags). Once codecs or tools need a central list, modules register their **keys** in a registry (which also detects name collisions between modules); the registry never creates its own type-to-name mapping. Extensions stay additive; rebinding an existing name to another type is deliberately not supported (it would break saves).
