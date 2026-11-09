@@ -216,7 +216,7 @@ sequenceDiagram
     D-->>U: CommitResult [ (CheckRolled, []), (ContainerUnlocked, [chest.Lock]) ]
 ```
 
-If validation fails, the result is a **typed rejection** (e.g. `TooFarAway(distance: 3, max: 1)`) and the state is unchanged.
+If validation fails, the result is a **rejection** (reason code + arguments, e.g. `container.too_far_away(distance: 3, max: 1)`) and the state is unchanged.
 
 ### 6.2 Reaction chain with a pending player decision
 
@@ -342,7 +342,12 @@ flowchart LR
 - For replays only external inputs (actions, elapsed real time) are recorded, plus the active AI modules and versions (AI decisions are recomputed).
 
 ### 8.9 Error handling
-- Expected rejections: typed reason codes with parameters, no state change.
+- **Rejections.** Actions are checked before they have any effect. Rule violations (out of range, already open, locked, …) are expected and give a rejection: a stable, feature-namespaced reason code with named arguments, no state change. One rejection type for all reasons (not one type per reason); the code is an identifier, not a localization key: the frontend keeps its own mapping from codes to texts.
+- **The line is the observer's projection, not the truth.** The frontend acts on what it has been sent, which can lag behind the truth (remembered knowledge, patches not yet presented). Input that refers to something in that projection but is no longer valid in the truth is a rule violation and gives a rejection: the remembered goblin has moved, the remembered chest is gone.
+- **Malformed input is a bug in the caller and throws.** This is input a compliant frontend never sends: an entity absent from the last projection sent to that observer, a structurally wrong target kind, or a `Decide` answer that wasn't offered. The same applies to AI controllers. They check candidate actions with the same validation queries as the frontend, and an invalid action or answer is a bug (it is never rejected, so it can't retry forever).
+- **Rejections must not leak.** Their arguments come only from what the observer knows. For example, a distance is measured to the remembered position, never to the true one. A rejection is never a probe for hidden state.
+- **A rejection is pure validation.** It is only valid before the action has submitted an effect, emitted an event or called `Decide`; a rejection after that is a handler bug and throws. A rejection therefore never retracts steps already shown, including provisional ones (ADR-023), and the player never answers a question only to be told the action was invalid. Anything that goes wrong after that point is an **outcome**, reported as an event (a failed lock pick, an interrupted move).
+- Multiplayer note: "malformed input throws" is a backend-internal contract. A future network boundary must turn malformed remote input into a refusal of its own instead of letting a client crash the server.
 - Bugs/invariant violations: exceptions; the commit is discarded; the state stays intact. For now this **fails hard for every origin** (ADR-028). Known gap: a throwing scheduler entry stays due and blocks time; a throwing story trigger or reaction makes its triggering action fail every time. Release-build handling (e.g. quarantining only the culprit) is to be decided before any release.
 
 ### 8.10 Persistence

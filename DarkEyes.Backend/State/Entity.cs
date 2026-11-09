@@ -32,6 +32,8 @@ public sealed record Entity
         return (T)Components[key.Name];
     }
 
+    public bool Has(ComponentKey key) => Components.ContainsKey(key.Name);
+
     public Entity With<T>(ComponentKey<T> key, T component)
         where T : class
     {

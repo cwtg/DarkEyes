@@ -32,8 +32,13 @@ public sealed class GameStore
     public DispatchResult Dispatch(IAction action)
     {
         Transaction transaction = new(State, _sent);
-        CommitResult commit = new Chain(transaction, _actions, _effects).Run(action);
+        Rejection? rejection = new Chain(transaction, _actions, _effects).Run(action);
+        if (rejection is not null)
+        {
+            return new Rejected(rejection);
+        }
 
+        CommitResult commit = transaction.Complete();
         State = transaction.State;
         _sent = transaction.Sent;
         return new Committed(commit);

@@ -17,8 +17,8 @@ Handoff for an implementation session. Agreed with the user on 2026-11-09.
 ## Steps
 
 1. **The hero opens an adjacent, unlocked chest.** This creates the minimal core: immutable state root, entities with components keyed by stable name, dispatch of an action, one effect, one op, and a commit result with one `(event, patches)` step. A minimal projection plus a test mirror lets the test assert on what the frontend would see. Opening a container is generic gameplay, so the action, handler, component and event live in the backend (feature folder `Containers/`, ADR-010).
-2. **The chest is too far away** → typed rejection (e.g. `TooFarAway(distance, max)`); state unchanged.
-3. **The chest is already open** → typed rejection.
+2. **The chest is too far away** → rejection `container.too_far_away(distance, max)`; state unchanged.
+3. **The chest is already open** → rejection.
 4. **The chest is locked; the hero picks the lock** → success depends on the DSA5 check. This introduces the rule-module assembly (`DarkEyes.Rules.Dsa5`): the backend defines the interface it needs for unlocking (shaped by this use case only), and the rule module implements it with the 3d20 lock-picking check, moved out of the current `Core/Resolution`. It also adds our own seeded PRNG (with streams) instead of `System.Random`. See §6.1.
 5. **Picking the lock fails** → the chest stays locked; the event carries the roll.
 
@@ -52,7 +52,7 @@ public void Should_OpenChest_When_HeroIsAdjacentAndChestIsUnlocked()
 |---|---|
 | Mutable `Entity` with setters; `States`/components keyed by `Type`; `EntityStore` per location | Immutable state tree; components keyed by stable name in ordinal-sorted maps; one global entity store |
 | Handlers write state directly; `GameOrchestrator` with an Rx `Subject` | Action → effect → op → commit; push via BCL `IObservable` (or nothing yet, if the tests don't need it) |
-| `ErrorRaisedEvent` strings | Typed rejection codes with parameters |
+| `ErrorRaisedEvent` strings | Rejections: reason codes with named arguments |
 | `SeededRandomSource` on `System.Random`; tests passing `(new Random() as IRandomSource)!` (always `null`) | Own PRNG, state-held streams, seeded tests |
 | DSA code in the engine (`Core/Stats`, `Core/Modifiers`, `Core/Resolution`, `"lockpicking"` in `OpenContainerHandler`) | Rule-module assembly |
 | `ChallengeRatingModifier` adds the challenge rating (higher = easier?) | A test against the DSA5 rule; flag the deviation to the user if it is one |
@@ -70,10 +70,15 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 - **State encapsulation (step 1, from review):** `Entity` and `GameState` are non-positional records with private constructors and private `init`, so outside code can't use `with` or pass its own maps; factories and `With` are the only way in, which keeps the ordinal comparers and the key type check. `Entity.Components` is internal. `GameStore.State` is internal (the frontend only sees projections); tests reach it via `InternalsVisibleTo`. `Patch` is closed (`private protected`). A `GameStoreBuilder` builds exactly one store.
 - **Test support (step 1):** `ScenarioBuilder`, `TestMirror` and `TestIds` live in `DarkEyes.Backend.Tests/Support/`. Whether they move into a shared library is decided in step 4.
 - **Component access:** by key object, see `decisions.md`.
+- **Rejections (step 2):** one `Rejection` type (code + named arguments), not one type per reason: there will be many reasons, and most are only displayed. Codes are `feature.snake_case`, created only through per-feature factories (`ContainerRejections`), which keep code and arguments consistent. The code is no localization key; Unity maps codes to texts. `ToString()` gives a readable form for logs and tests instead of a hand-written message. Action handlers return `Rejection?`; on a rejection the whole chain is discarded (state and last projection sent unchanged) and `Dispatch` returns `Rejected(Rejection)`.
+- **Rejections (step 2), addendum from the review:** arguments are restricted to `int`, `bool`, `string`, `EntityId`; argument names are constants next to the factory; `Rejection` has explicit value equality over code and arguments. A rejection after a submitted effect or emitted event throws (`Chain`); `GameStore` alone decides about the commit.
+- **Malformed input (step 2):** a target without `ContainerState` throws `ArgumentException` in the action handler. An unknown entity ID throws from `GameState.GetEntity`.
+- **Reach (step 2):** hex distance between the `Placement` positions, at most 1 (neighbouring hex), until footprints exist. Known gap: `GamePosition.DistanceTo` ignores the level, so a container directly above or below counts as adjacent; fixed with levels in the movement story.
+- **Sync invariant (step 2):** `TestMirror.AssertMatches(store)` checks mirror == projection of the current state; integration tests call it.
 
 ## Decisions the implementing session should raise with the user (not decided yet)
 
-- The rejection type (step 2); from step 4, how the rule module registers its unlock implementation and how `ScenarioBuilder` gets it.
+- From step 4, how the rule module registers its unlock implementation and how `ScenarioBuilder` gets it.
 - Where rule-module tests live (from step 4): the existing test project referencing both assemblies, or a separate `DarkEyes.Rules.Dsa5.Tests`.
 - Which PRNG (PCG32 or xoshiro128\*\*) and how streams are derived from the master seed.
 - How "adjacent" is measured before footprints exist (hex distance between positions is the obvious interim; footprints come with movement).
@@ -87,9 +92,10 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 
 ## Status
 
-- **2026-11-09:** step 1 is green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: range check (step 2), rejections, observer-view policies for events, component visibility policies, the sync-invariant check (mirror == projection of the final state). The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); step 4 may need "component added" for lock state.
+- **2026-11-09:** steps 1 and 2 are green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: observer-view policies for events, component visibility policies. The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); step 4 may need "component added" for lock state.
+- **Deferred (line = projection, §8.9):** today the projection equals the truth, so the range check against the true positions is equivalent. Once perception or remembered knowledge exists, validation must be measured against the observer's last projection (existence and remembered position). That also covers "no leaks".
 - **Deferred from the review of step 1:**
   - **Unity dependencies:** `System.Collections.Immutable` 10.0.11 pulls in `System.Memory` 4.6.3 and `System.Runtime.CompilerServices.Unsafe` 6.1.2; only Immutable is copied to `Assets/Plugins`. Check in the Unity editor (dependency spike, at the latest with the walking skeleton): copy the dependencies or pick versions matching what Unity ships.
   - **Value equality of collections in records** (`Step.Patches`, `CommitResult.Steps`, `EntityAppeared.Components`, entity maps): decide when replay checks, golden tests or the mirror == projection comparison need it.
   - **Re-entrancy guard** on `GameStore.Dispatch`: add together with the `IObservable` push (the first way to re-enter), with a test.
-- Next: step 2.
+- Next: step 3 (already open → rejection).
