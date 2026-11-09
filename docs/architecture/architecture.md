@@ -519,7 +519,6 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 
 ### 11.2 Technical debt in the current code (as of 2026-11-08)
 
-- Build broken: `EntityStore` was refactored to `TryGet`/`TryAdd`/`TryMutateEntity`, but `LocationState`, both handlers and tests still use the old API.
 - State is mutable (`Entity` setters, `LocationState.ChangePosition`, `ItemContainer` inside the `LockedContainerState` record); no single state root; per-location `EntityStore`.
 - Handlers write state directly and emit events separately; errors as untyped `ErrorRaisedEvent` strings.
 - DSA5 code (`Core/Stats`, `Core/Modifiers`, `Core/Resolution`, `"lockpicking"` in `OpenContainerHandler`) lives in the engine.

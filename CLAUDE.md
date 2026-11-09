@@ -63,11 +63,11 @@ Build/test: `dotnet build DarkEyes.sln`, `dotnet test DarkEyes.sln`.
 
 ## Current code (pre-architecture, to be migrated)
 
-The code predates the agreed architecture; architecture doc §11.2 lists the gaps. In short:
+The code predates the agreed architecture; architecture doc §11.2 lists the gaps. Migration happens use case by use case (TDD, new code alongside the old, old code deleted once ported); plans for implementation sessions are in `docs/implementation/`. In short:
 - Flow today: `IGameOrchestrator.Dispatch(ICommand)` → `CommandRouter` → `ICommandHandler<T>.Handle(command, HandlerContext)` → `context.Emit(IGameEvent)` → Rx `Events`. Handlers write mutable state directly; errors are `ErrorRaisedEvent` strings.
 - `Core/Stats`, `Core/Modifiers`, `Core/Resolution`: DSA5 check engine (3d20 against three attributes, skill value as pool, quality level 1–6, crits/blunders). It belongs in the future rule module.
 - `Entities` (components keyed by `Type`), `Space` (hex grid, A*), `Inventory`, `Store`, `Time`, `Story`, `Persistence` (planned).
-- **The build is currently broken** by an uncommitted `EntityStore` refactor (`TryGet`/`TryAdd`/`TryMutateEntity`).
+- An unfinished `EntityStore` Try-pattern refactor plus new inventory types (`ItemRef`, `ItemContainer`, `CurrencyWallet`, PickUpItem) is parked on branch `wip/entitystore-refactor` (doesn't build); `main` builds.
 
 ## Open design decisions — discuss before implementing
 
