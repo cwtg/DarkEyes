@@ -1,4 +1,5 @@
 using System;
+using DarkEyes.Backend.Checks;
 using DarkEyes.Backend.Containers;
 using DarkEyes.Backend.Pipeline;
 using DarkEyes.Backend.Space;
@@ -30,6 +31,22 @@ public sealed class RejectionTests
     }
 
     [Fact]
+    public void Should_Throw_When_HandlerRejectsAfterACheck()
+    {
+        // Arrange
+        GameStore game = new GameStoreBuilder()
+            .UseChecks(new ScriptedChecks(succeed: false))
+            .AddActionHandler(new CheckThenRejectHandler())
+            .Build(GameState.Empty);
+
+        // Act
+        void Act() => game.Dispatch(new CheckThenRejectAction(TestIds.Alrik));
+
+        // Assert
+        Assert.Throws<InvalidOperationException>(Act);
+    }
+
+    [Fact]
     public void Should_Throw_When_ARejectionArgumentIsNotASimpleValue()
     {
         // Act
@@ -37,6 +54,17 @@ public sealed class RejectionTests
 
         // Assert
         Assert.Throws<ArgumentException>(Act);
+    }
+
+    private sealed record CheckThenRejectAction(EntityId Actor) : IAction;
+
+    private sealed class CheckThenRejectHandler : IActionHandler<CheckThenRejectAction>
+    {
+        public Rejection? Handle(CheckThenRejectAction action, ActionContext context)
+        {
+            context.Check(new CheckRequest(new CheckPurpose("test.check"), action.Actor, Target: null));
+            return Rejection.Create("test.too_late");
+        }
     }
 
     private sealed record SubmitThenRejectAction(EntityId Actor, EntityId Container) : IAction;

@@ -1,5 +1,7 @@
 using System;
+using DarkEyes.Backend.Checks;
 using DarkEyes.Backend.Containers;
+using DarkEyes.Backend.LockPicking;
 using DarkEyes.Backend.Locks;
 using DarkEyes.Backend.Pipeline;
 using DarkEyes.Backend.Space;
@@ -11,6 +13,7 @@ namespace DarkEyes.Backend.Tests.Support;
 internal sealed class ScenarioBuilder
 {
     private GameState _state = GameState.Empty;
+    private IChecks? _checks;
 
     public ScenarioBuilder WithHero(EntityId id, GamePosition at)
     {
@@ -18,15 +21,32 @@ internal sealed class ScenarioBuilder
             .With(Placement.Key, new Placement(at)));
     }
 
-    public ScenarioBuilder WithChest(EntityId id, GamePosition at, bool isOpen = false, bool isLocked = false)
+    public ScenarioBuilder WithChest(EntityId id, GamePosition at, bool isOpen = false, ChestLock chestLock = ChestLock.None)
     {
         Entity chest = Entity.Create(id)
             .With(Placement.Key, new Placement(at))
             .With(ContainerState.Key, new ContainerState(isOpen));
-        return Add(isLocked ? chest.With(Lock.Key, new Lock(IsLocked: true)) : chest);
+        return Add(chestLock == ChestLock.None ? chest : chest.With(Lock.Key, new Lock(IsLocked: chestLock == ChestLock.Locked)));
     }
 
-    public GameStore Build() => new GameStoreBuilder().AddContainers().Build(_state);
+    /// <summary>The check service standing in for the rule module; without it, any check fails the test.</summary>
+    public ScenarioBuilder WithChecks(IChecks checks)
+    {
+        _checks = checks;
+        return this;
+    }
+
+    public GameStore Build()
+    {
+        GameStoreBuilder builder = new GameStoreBuilder().AddContainers().AddLocks().AddLockPicking()
+            .AddActionHandler(new DecreeHandler());
+        if (_checks is not null)
+        {
+            builder.UseChecks(_checks);
+        }
+
+        return builder.Build(_state);
+    }
 
     private ScenarioBuilder Add(Entity entity)
     {

@@ -1,33 +1,41 @@
 using System;
+using DarkEyes.Backend.Checks;
 
 namespace DarkEyes.Backend.Pipeline;
 
 /// <summary>One run of the pipeline: a root and everything that follows from it, against one transaction.</summary>
-internal sealed class Chain(Transaction transaction, ActionRouter actions, EffectRouter effects)
+internal sealed class Chain(Transaction transaction, PipelineServices services)
 {
     private readonly Transaction _transaction = transaction;
-    private readonly ActionRouter _actions = actions;
-    private readonly EffectRouter _effects = effects;
+    private readonly PipelineServices _services = services;
     private bool _changed;
 
     public Transaction Transaction => _transaction;
 
-    /// <summary>Runs the root action. A rejection is pure validation: it is only valid before the first submitted effect or emitted event.</summary>
+    /// <summary>Runs the root action. A rejection is pure validation: it is only valid before the first check, submitted effect or emitted event.</summary>
     public Rejection? Run(IAction root)
     {
-        Rejection? rejection = _actions.Handle(root, new ActionContext(this));
+        Rejection? rejection = _services.Actions.Handle(root, new ActionContext(this));
         if (rejection is not null && _changed)
         {
-            throw new InvalidOperationException($"{root.GetType().Name} was rejected ({rejection}) after it had already submitted effects or emitted events. Validate before changing anything.");
+            throw new InvalidOperationException($"{root.GetType().Name} was rejected ({rejection}) after it had already run a check, submitted effects or emitted events. Validate before changing anything.");
         }
 
         return rejection;
     }
 
+    public CheckResult Check(CheckRequest request)
+    {
+        _changed = true;
+        IChecks checks = _services.Checks
+            ?? throw new InvalidOperationException($"A check ({request.Purpose}) was requested, but no check service is installed. The rule module installs it.");
+        return checks.Roll(request, new CheckContext(this));
+    }
+
     public void Submit(IEffect effect)
     {
         _changed = true;
-        _effects.Apply(effect, new EffectContext(_transaction));
+        _services.Effects.Apply(effect, new EffectContext(this));
     }
 
     public void Emit(IEvent gameEvent)

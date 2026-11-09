@@ -7,15 +7,13 @@ namespace DarkEyes.Backend.Pipeline;
 /// <summary>Owns the committed state; the single, serialized entry point for changes.</summary>
 public sealed class GameStore
 {
-    private readonly ActionRouter _actions;
-    private readonly EffectRouter _effects;
+    private readonly PipelineServices _services;
     private Projection _sent = Projection.Empty;
 
-    internal GameStore(GameState state, ActionRouter actions, EffectRouter effects)
+    internal GameStore(GameState state, PipelineServices services)
     {
         State = state;
-        _actions = actions;
-        _effects = effects;
+        _services = services;
     }
 
     internal GameState State { get; private set; }
@@ -32,7 +30,7 @@ public sealed class GameStore
     public DispatchResult Dispatch(IAction action)
     {
         Transaction transaction = new(State, _sent);
-        Rejection? rejection = new Chain(transaction, _actions, _effects).Run(action);
+        Rejection? rejection = new Chain(transaction, _services).Run(action);
         if (rejection is not null)
         {
             return new Rejected(rejection);

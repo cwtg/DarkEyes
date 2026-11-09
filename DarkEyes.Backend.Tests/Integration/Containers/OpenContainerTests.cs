@@ -78,7 +78,7 @@ public sealed class OpenContainerTests
         // Arrange
         GameStore game = new ScenarioBuilder()
             .WithHero(TestIds.Alrik, at: new GamePosition(0, 0, 0))
-            .WithChest(TestIds.CellarChest, at: new GamePosition(1, 0, 0), isLocked: true)
+            .WithChest(TestIds.CellarChest, at: new GamePosition(1, 0, 0), chestLock: ChestLock.Locked)
             .Build();
         var mirror = TestMirror.Connect(game);
         GameState before = game.State;
@@ -99,7 +99,7 @@ public sealed class OpenContainerTests
         // Arrange
         GameStore game = new ScenarioBuilder()
             .WithHero(TestIds.Alrik, at: new GamePosition(0, 0, 0))
-            .WithChest(TestIds.CellarChest, at: new GamePosition(3, 0, 0), isLocked: true)
+            .WithChest(TestIds.CellarChest, at: new GamePosition(3, 0, 0), chestLock: ChestLock.Locked)
             .Build();
 
         // Act
@@ -108,6 +108,23 @@ public sealed class OpenContainerTests
         // Assert
         Rejection rejection = Assert.IsType<Rejected>(result).Reason;
         Assert.Equal(OpenContainerRejections.TooFarAway(distance: 3, maxDistance: 1), rejection);
+    }
+
+    [Fact]
+    public void Should_DoNothing_When_OpeningIsDecreedForAnOpenContainer()
+    {
+        // Arrange
+        GameStore game = new ScenarioBuilder()
+            .WithChest(TestIds.CellarChest, at: new GamePosition(0, 0, 0), isOpen: true)
+            .Build();
+        var mirror = TestMirror.Connect(game);
+
+        // Act
+        DispatchResult result = game.Dispatch(new DecreeAction(new OpenContainerEffect(TestIds.CellarChest, TestIds.Alrik)));
+
+        // Assert
+        Assert.Empty(Assert.IsType<Committed>(result).Commit.Steps);
+        mirror.AssertMatches(game);
     }
 
     [Fact]

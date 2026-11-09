@@ -36,3 +36,8 @@ Agreed with the user before starting story 01.
 - Each component type declares its stable name once, as a static key: `ContainerState.Key = new ComponentKey<ContainerState>("container")`. Access goes through the key (`entity.Get(ContainerState.Key)`); there is no type-to-name registry.
 - **Why:** type and name can't drift apart, no runtime lookup can fail for an unregistered type, and the key is the natural place for the codec and visibility policy later.
 - A key is a value (name + type), not bound 1:1 to a type: it can be defined outside the type, and one type can have several keys (e.g. tags). Once codecs or tools need a central list, modules register their **keys** in a registry (which also detects name collisions between modules); the registry never creates its own type-to-name mapping. Extensions stay additive; rebinding an existing name to another type is deliberately not supported (it would break saves).
+
+## 2026-11-09: Idempotent effects
+
+- An effect whose target state already holds does nothing (no op, no event), e.g. `UnlockEffect` on an unlocked lock or `OpenContainerEffect` on an open container.
+- **Why:** effects are decreed and can't be refused (§8.2), and a rejection there would be late (§8.9); decreeing callers such as the story need no check first.

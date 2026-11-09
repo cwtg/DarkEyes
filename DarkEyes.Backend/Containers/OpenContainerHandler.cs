@@ -8,7 +8,7 @@ namespace DarkEyes.Backend.Containers;
 
 internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
 {
-    /// <summary>Interim reach until footprints exist: the actor must stand on a neighbouring hex.</summary>
+    /// <summary>Opening needs the actor on a neighbouring hex.</summary>
     private const int MaxDistance = 1;
 
     public Rejection? Handle(OpenContainerAction action, ActionContext context)
@@ -24,10 +24,7 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
             return OpenContainerRejections.AlreadyOpen();
         }
 
-        GamePosition actorPosition = context.State.GetEntity(action.Actor).Get(Placement.Key).Position;
-        GamePosition containerPosition = container.Get(Placement.Key).Position;
-
-        int distance = actorPosition.DistanceTo(containerPosition);
+        int distance = PlacementDistance.Between(context.State, action.Actor, action.Container);
         if (distance > MaxDistance)
         {
             return OpenContainerRejections.TooFarAway(distance, MaxDistance);
