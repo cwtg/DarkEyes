@@ -16,10 +16,10 @@ Handoff for an implementation session. Agreed with the user on 2026-11-09.
 
 ## Steps
 
-1. **The hero opens an adjacent, unlocked chest.** This creates the minimal core: immutable state root, entities with components keyed by stable name, dispatch of an action, one effect, one op, and a commit result with one `(event, patches)` step. A minimal projection plus a test mirror lets the test assert on what the frontend would see.
+1. **The hero opens an adjacent, unlocked chest.** This creates the minimal core: immutable state root, entities with components keyed by stable name, dispatch of an action, one effect, one op, and a commit result with one `(event, patches)` step. A minimal projection plus a test mirror lets the test assert on what the frontend would see. Opening a container is generic gameplay, so the action, handler, component and event live in the backend (feature folder `Containers/`, ADR-010).
 2. **The chest is too far away** → typed rejection (e.g. `TooFarAway(distance, max)`); state unchanged.
 3. **The chest is already open** → typed rejection.
-4. **The chest is locked; the hero picks the lock** → success depends on the DSA5 check. This introduces the rule-module assembly (`DarkEyes.Rules.Dsa5`), moves the 3d20 check there, and adds our own seeded PRNG (with streams) instead of `System.Random`.
+4. **The chest is locked; the hero picks the lock** → success depends on the DSA5 check. This introduces the rule-module assembly (`DarkEyes.Rules.Dsa5`): the backend defines the interface it needs for unlocking (shaped by this use case only), and the rule module implements it with the 3d20 lock-picking check, moved out of the current `Core/Resolution`. It also adds our own seeded PRNG (with streams) instead of `System.Random`. See §6.1.
 5. **Picking the lock fails** → the chest stays locked; the event carries the roll.
 
 Next use case afterwards (separate plan): taking an item from the chest into the party inventory. It reuses the parked inventory drafts on branch `wip/entitystore-refactor`.
@@ -65,9 +65,9 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 
 ## Decisions the implementing session should raise with the user (not decided yet)
 
-- Concrete public API shape: the dispatcher entry point, the commit result type, the rejection type.
+- Concrete public API shape: the dispatcher entry point, the commit result type, the rejection type; from step 4, how the rule module registers its unlock implementation and how `ScenarioBuilder` gets it.
+- Where rule-module tests live (from step 4): the existing test project referencing both assemblies, or a separate `DarkEyes.Rules.Dsa5.Tests`.
 - Which PRNG (PCG32 or xoshiro128\*\*) and how streams are derived from the master seed.
-- Whether to add BannedApiAnalyzers in this use case or as a separate small step before it.
 - How "adjacent" is measured before footprints exist (hex distance between positions is the obvious interim; footprints come with movement).
 - Where `ScenarioBuilder` and the test mirror live (test project vs. a shared test-support library).
 

@@ -103,7 +103,7 @@ flowchart LR
 | Determinism | All randomness through serializable PRNG streams (one per domain) in the state; time only as input; IDs from a counter in the state; execution order defined by the rules, with a stable engine fallback. |
 | Frontend consistency without logic duplication | Frontend keeps a **mirror** updated only by **patches** generated centrally by **diffing projections**; rule-dependent previews call backend queries. |
 | Information hiding | Patches come from the observer's **projection**; events pass through the **observer view**; knowledge is ordinary state (tags/components). |
-| Rule separability | **Engine** + **rule module** (separate assembly, plug-in via registration). |
+| Rule separability | **Backend** (engine + generic gameplay) + **rule module** with only the DSA5-specific mechanics (separate assembly, plug-in via registration). |
 | Swappable AI | AI as **controller modules** (separate assemblies), like the player but inside the backend. |
 | Real time + rounds + time jumps | Backend-owned game clock with a **scheduler** of *When + If → Then* triggers (the only time mechanism); frontend only reports real time. |
 | Player decisions mid-action, saveable | Interrupted chains stored as `PendingResolution` and **re-run** from the committed state on each answer. |
@@ -125,7 +125,7 @@ flowchart TB
         UT[Unity.Tests]
     end
     subgraph Backend["Backend assemblies"]
-        E[DarkEyes.Backend — Engine<br/>state · pipeline · time · space · visibility · story hooks · persistence]
+        E[DarkEyes.Backend — Engine + gameplay<br/>state · pipeline · time · space · visibility · story hooks · persistence<br/>containers · inventory · movement · …]
         R[DarkEyes.Rules.Dsa5 — Rule module<br/>stats · checks · combat · magic · conditions]
         AI[DarkEyes.AI.* — AI modules<br/>controllers for NPCs / auto-battle]
     end
@@ -142,13 +142,13 @@ flowchart TB
 ```
 
 Dependency rules **[decided]**:
-- The rule module references the engine, **never the reverse** (compiler-enforced, ADR-010).
+- The rule module references the backend, **never the reverse** (compiler-enforced, ADR-010).
 - AI modules reference the engine and the rule module; neither references an AI module (ADR-025).
 - Assembly timing: the rule module is a separate assembly **from the start** (the boundary that is painful to retrofit). AI modules and `Unity.Rules.Dsa5` start as their own folder/namespace behind their interfaces and become separate assemblies once a second AI or real DSA UI exists.
 - Unity references the backend DLLs; the backend never references Unity.
 - DSA-specific UI lives in `Unity.Rules.Dsa5`, so it can be swapped together with the rule module.
 
-### 5.2 Level 2 — engine (`DarkEyes.Backend`)
+### 5.2 Level 2 — backend: engine and gameplay (`DarkEyes.Backend`)
 
 | Building block | Responsibility |
 |---|---|
@@ -163,10 +163,11 @@ Dependency rules **[decided]**:
 | **Story** | Runs the Yarn VM as a throw-away object per run (ADR-029; random built-ins replaced, saliency strategy explicit); `ActiveDialogue` in the state; variable storage over the state; command → effect and function → query bindings; story triggers use the common trigger mechanism. |
 | **Persistence** | Snapshot ↔ JSON, format versioning (migrations once formats are stable), optional command log. |
 | **Queries** | Side-effect-free read API for the frontend (previews, pathfinding, reachable area, check estimates). |
+| **Gameplay** | Generic game verbs and their components, in feature folders (containers, doors, inventory, …). Calls DSA5 mechanics only through backend-defined interfaces that the rule module registers (ADR-010). |
 
 ### 5.3 Level 2 — rule module (`DarkEyes.Rules.Dsa5`)
 
-Registers with the engine: DSA components (attributes, skills, life/astral/karma points, conditions, equipment), actions and handlers (attack, parry/dodge, cast, pick lock, …), effects, reaction rules (e.g. free attack / *Passierschlag*), initiative values, tie-breaking and round rules, execution order where it matters, perception (writes knowledge tags through effects), condition types for triggers, derived values (incl. party stats), Yarn functions/commands that need rules (e.g. skill checks in dialogue), DSA content schemas. Internally it may be as DSA-specific as needed (no speculative generic rule interfaces, ADR-010).
+Registers with the engine: DSA components (attributes, skills, life/astral/karma points, conditions, equipment), implementations of the backend's rule interfaces (e.g. unlocking by lock picking), DSA-specific actions and handlers (attack, parry/dodge, cast, …), effects, reaction rules (e.g. free attack / *Passierschlag*), initiative values, tie-breaking and round rules, execution order where it matters, perception (writes knowledge tags through effects), condition types for triggers, derived values (incl. party stats), Yarn functions/commands that need rules (e.g. skill checks in dialogue), DSA content schemas. Internally it may be as DSA-specific as needed (no speculative generic rule interfaces, ADR-010).
 
 ### 5.4 Level 2 — AI modules (`DarkEyes.AI.*`)
 
@@ -196,14 +197,18 @@ sequenceDiagram
     participant U as Unity
     participant D as Dispatcher
     participant P as Preconditions
-    participant A as Action handler (rule module)
+    participant A as Action handler (backend gameplay)
+    participant R as Unlock rule (rule module)
     participant F as Effect handlers
     participant S as State
     U->>D: Dispatch(OpenContainer(actor, chest))
     D->>P: layer/mode, turn, able to act, costs
     P-->>D: ok
     D->>A: handle (transaction view, RNG from state)
-    A->>A: validate (range, locked) → skill check (3d20)
+    A->>A: validate (range, open/locked)
+    A->>R: try to unlock (actor, lock)
+    R->>R: lock-picking check (3d20)
+    R-->>A: outcome + CheckRolled
     A->>F: effects: Unlock(chest), events: CheckRolled, ContainerUnlocked
     F->>F: enforce invariants → ops
     D->>S: apply ops atomically → new state
@@ -377,7 +382,7 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 | 007 | Rounds in initiative order run by the engine; initiative values, ties, round duration and turn content from the rule module; only backend rules switch into rounds; NPC turns computed immediately. | decided (revised 2026-11-09) |
 | 008 | Entity = Id + DefId + typed components; definitions as static content with per-component overrides. | decided |
 | 009 | Global entity store with placement component; exactly-one-place invariant. | decided |
-| 010 | DSA5 as a separate rule-module assembly plugged in via registration; no speculative generic rule interfaces; setting only in content. Common RPG concepts may live in the engine; only DSA5-specific mechanics must be swappable. | decided (clarified 2026-11-09) |
+| 010 | DSA5 as a separate rule-module assembly plugged in via registration; no speculative generic rule interfaces; setting only in content. The backend is this game, not a generic engine: generic gameplay lives there; only DSA5-specific mechanics go into the module, called through backend-defined interfaces where needed. | decided (revised 2026-11-09) |
 | 011 | Patches from the observer's projection, events through the observer view; per-component visibility policies; redaction mandatory. | decided (revised 2026-11-09) |
 | 012 | No runtime reflection in the backend (IL2CPP stripping). | decided |
 | 013 | Locations authored in the Unity editor and baked to JSON; shared `HexLayout`; named anchors for story. | decided |
@@ -425,8 +430,8 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 
 ### ADR-010 — Rule module as separate assembly
 - **Context:** DSA5 rules may need to be replaced if the game is ever released.
-- **Decision:** engine and rule module as separate assemblies; the rule module plugs in via registration; no speculative generic rule interfaces; setting content only in content files. The separation exists for trademark/licensing: the engine may assume common RPG concepts (dice, attributes, life points, initiative-ordered rounds, checks as a concept) under generic names; DSA5-specific mechanics (3d20 check, quality levels, formulas, tables, special abilities, spells, terminology) live in the module. Common concepts live in the rule module **by default** and move into the engine only when engine code actually needs them (e.g. initiative order for running rounds). No alternative test rule module is needed.
-- **Consequences:** + the boundary is compiler-enforced; + replacing DSA5 means writing a new module of the same shape. − deciding where code belongs takes discipline; − cross-cutting changes touch two projects.
+- **Decision:** the backend is this game, not a generic engine; the separation exists only to make trademarked mechanics replaceable. Backend and rule module are separate assemblies; the rule module plugs in via registration; setting content only in content files. Generic gameplay lives in the backend: containers, doors, inventory, movement, dialogue, and common RPG concepts (dice, attributes, life points, initiative-ordered rounds, checks as a concept) under generic names. Only DSA5-specific mechanics (3d20 check, quality levels, formulas, tables, special abilities, spells, terminology) live in the module. Where backend code needs such a mechanic (e.g. unlocking a lock by lock picking), it calls an interface defined in the backend and registered by the module; such interfaces exist only where backend code actually calls them and are shaped by current needs (no speculative generic rule interfaces). No alternative test rule module is needed.
+- **Consequences:** + the boundary is compiler-enforced; + replacing DSA5 means rewriting only the trademarked mechanics, not the game; + generic gameplay doesn't pay for an indirection. − deciding whether a mechanic is DSA-specific takes discipline; − the backend-defined rule interfaces reflect DSA5's shape, so a replacement module may need to adapt some of them.
 
 ### ADR-012 — No runtime reflection
 - **Context:** IL2CPP managed code stripping removes code reached only via reflection; failures only appear in built games.
@@ -555,7 +560,7 @@ Compact ADRs (context → decision → consequences). All dated 2026-11-08 unles
 | **Definition / instance** | Static content template (`EntityDef`) vs. runtime entity referring to it. |
 | **Anchor** | A named, stable marker in a location used by story content instead of coordinates. |
 | **Bake** | Converting a Unity location scene into location JSON. |
-| **Rule module** | The assembly containing the DSA5 rules, plugged into the engine. |
+| **Rule module** | The assembly containing only the DSA5-specific (trademarked) mechanics, plugged into the backend. |
 | **Pace (*Schritt*)** | DSA distance unit (≈ 1 m); tentatively 3 hexes per pace. |
 | **Combat round (*Kampfrunde*, KR)** | DSA5 unit of combat time; one round in turn-based mode. |
 | **Check (*Probe*)** | DSA5 skill check: 3d20 against three attributes, skill value as pool. |
