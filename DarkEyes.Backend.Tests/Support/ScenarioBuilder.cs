@@ -17,11 +17,11 @@ internal sealed class ScenarioBuilder
             .With(Placement.Key, new Placement(at)));
     }
 
-    public ScenarioBuilder WithChest(EntityId id, GamePosition at)
+    public ScenarioBuilder WithChest(EntityId id, GamePosition at, bool isOpen = false)
     {
         return Add(Entity.Create(id)
             .With(Placement.Key, new Placement(at))
-            .With(ContainerState.Key, new ContainerState(IsOpen: false)));
+            .With(ContainerState.Key, new ContainerState(isOpen)));
     }
 
     public GameStore Build() => new GameStoreBuilder().AddContainers().Build(_state);

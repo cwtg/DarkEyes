@@ -52,6 +52,27 @@ public sealed class OpenContainerTests
     }
 
     [Fact]
+    public void Should_RejectWithAlreadyOpen_When_ChestIsAlreadyOpen()
+    {
+        // Arrange
+        GameStore game = new ScenarioBuilder()
+            .WithHero(TestIds.Alrik, at: new GamePosition(0, 0, 0))
+            .WithChest(TestIds.CellarChest, at: new GamePosition(1, 0, 0), isOpen: true)
+            .Build();
+        var mirror = TestMirror.Connect(game);
+        GameState before = game.State;
+
+        // Act
+        DispatchResult result = game.Dispatch(new OpenContainerAction(TestIds.Alrik, TestIds.CellarChest));
+
+        // Assert
+        Rejection rejection = Assert.IsType<Rejected>(result).Reason;
+        Assert.Equal(ContainerRejections.AlreadyOpen(), rejection);
+        Assert.Same(before, game.State);
+        mirror.AssertMatches(game);
+    }
+
+    [Fact]
     public void Should_Throw_When_TargetIsNotAContainer()
     {
         // Arrange

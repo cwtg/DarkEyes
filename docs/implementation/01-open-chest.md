@@ -73,6 +73,7 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 - **Rejections (step 2):** one `Rejection` type (code + named arguments), not one type per reason: there will be many reasons, and most are only displayed. Codes are `feature.snake_case`, created only through per-feature factories (`ContainerRejections`), which keep code and arguments consistent. The code is no localization key; Unity maps codes to texts. `ToString()` gives a readable form for logs and tests instead of a hand-written message. Action handlers return `Rejection?`; on a rejection the whole chain is discarded (state and last projection sent unchanged) and `Dispatch` returns `Rejected(Rejection)`.
 - **Rejections (step 2), addendum from the review:** arguments are restricted to `int`, `bool`, `string`, `EntityId`; argument names are constants next to the factory; `Rejection` has explicit value equality over code and arguments. A rejection after a submitted effect or emitted event throws (`Chain`); `GameStore` alone decides about the commit.
 - **Malformed input (step 2):** a target without `ContainerState` throws `ArgumentException` in the action handler. An unknown entity ID throws from `GameState.GetEntity`.
+- **Already open (step 3):** rejection `container.already_open` without arguments; checked before the range, so a far-away open chest reports "already open" (walking there would be pointless).
 - **Reach (step 2):** hex distance between the `Placement` positions, at most 1 (neighbouring hex), until footprints exist. Known gap: `GamePosition.DistanceTo` ignores the level, so a container directly above or below counts as adjacent; fixed with levels in the movement story.
 - **Sync invariant (step 2):** `TestMirror.AssertMatches(store)` checks mirror == projection of the current state; integration tests call it.
 
@@ -92,10 +93,10 @@ Projection diffing beyond what the tests need; scheduler and time; movement and 
 
 ## Status
 
-- **2026-11-09:** steps 1 and 2 are green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: observer-view policies for events, component visibility policies. The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); step 4 may need "component added" for lock state.
+- **2026-11-09:** steps 1–3 are green (`Integration/Containers/OpenContainerTests.cs`). Not built yet, by design: observer-view policies for events, component visibility policies. The projection **throws** for an entity disappearing and for a component being added to or removed from a visible entity (no patch kinds for these yet); step 4 may need "component added" for lock state.
 - **Deferred (line = projection, §8.9):** today the projection equals the truth, so the range check against the true positions is equivalent. Once perception or remembered knowledge exists, validation must be measured against the observer's last projection (existence and remembered position). That also covers "no leaks".
 - **Deferred from the review of step 1:**
   - **Unity dependencies:** `System.Collections.Immutable` 10.0.11 pulls in `System.Memory` 4.6.3 and `System.Runtime.CompilerServices.Unsafe` 6.1.2; only Immutable is copied to `Assets/Plugins`. Check in the Unity editor (dependency spike, at the latest with the walking skeleton): copy the dependencies or pick versions matching what Unity ships.
   - **Value equality of collections in records** (`Step.Patches`, `CommitResult.Steps`, `EntityAppeared.Components`, entity maps): decide when replay checks, golden tests or the mirror == projection comparison need it.
   - **Re-entrancy guard** on `GameStore.Dispatch`: add together with the `IObservable` push (the first way to re-enter), with a test.
-- Next: step 3 (already open → rejection).
+- Next: step 4 (locked chest, lock picking → rule module and PRNG).

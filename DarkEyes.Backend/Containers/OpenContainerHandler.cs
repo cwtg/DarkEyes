@@ -18,6 +18,11 @@ internal sealed class OpenContainerHandler : IActionHandler<OpenContainerAction>
             throw new ArgumentException($"{action.Container} is not a container; a compliant caller never sends this.", nameof(action));
         }
 
+        if (container.Get(ContainerState.Key).IsOpen)
+        {
+            return ContainerRejections.AlreadyOpen();
+        }
+
         GamePosition actorPosition = context.State.GetEntity(action.Actor).Get(Placement.Key).Position;
         GamePosition containerPosition = container.Get(Placement.Key).Position;
 
