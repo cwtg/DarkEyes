@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    # Windows matches the development machine (CRLF line endings, enforced formatting).
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          # The tests target net9.0 and need its runtime next to the SDK from global.json.
+          dotnet-version: 9.0.x
+
+      - name: Restore
+        run: dotnet restore DarkEyes.sln
+
+      - name: Build
+        run: dotnet build DarkEyes.sln --no-restore --configuration Release
+
+      - name: Test
+        run: dotnet test DarkEyes.sln --no-build --configuration Release
